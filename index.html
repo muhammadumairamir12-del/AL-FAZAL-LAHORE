@@ -59,7 +59,7 @@ body[data-page-theme="home"] {
 }
 body[data-page-theme="services"] {
     --page-accent: var(--accent-secondary);
-    --dark-bg3: var(--dark-bg4); /* Slightly lighter cards on this page */
+    --dark-bg3-services: var(--dark-bg4); /* Slightly lighter cards on this page */
 }
 body[data-page-theme="products"] {
     --page-accent: var(--accent-light);
@@ -156,7 +156,7 @@ body[data-page-theme="sitemap"] {
 .cs:hover{background:rgba(0,230,118,.04);transform:translateY(-3px);}
 .fl-btn:hover{box-shadow:0 5px 20px var(--page-accent);}
 .f-soc:hover{background:rgba(0,230,118,.15);border-color:var(--page-accent);}
-.modal .mbox{border-top-color:var(--page-accent);}
+.mbg .mbox{border-top-color:var(--page-accent);} /* Corrected to target all modals */
 
 
 body{
@@ -205,6 +205,7 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
 .n-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--page-accent);transition:width .3s ease;}
 .n-links a:hover{color:var(--page-accent);transform:translateY(-2px);}
 .n-links a:hover::after{width:100%;}
+/* Desktop actions, hidden on mobile */
 .n-actions{display:flex;gap:0.75rem;align-items:center;margin-left:1.5rem;}
 .n-search-input {
   padding: 0.5rem 1rem;
@@ -220,16 +221,20 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
 }
 .n-search-input::placeholder {color: var(--gray2);}
 .n-search-input:focus {border-color: var(--page-accent);box-shadow: 0 0 0 3px rgba(0,230,118,0.2);}
+.search-highlight {
+    background-color: rgba(0,176,255,0.4); /* Highlight with secondary accent */
+    color: white;
+}
 
 /* Hamburger Menu */
 .hamburger {
-  display: none; /* Hidden by default */
+  display: none; /* Hidden by default for desktop */
   width: 30px;
   height: 20px;
   position: relative;
   cursor: pointer;
   z-index: 1000;
-  margin-left: 1rem;
+  margin-left: 1.5rem; /* Position to the right of logo, before desktop actions */
 }
 .hamburger span {
   display: block;
@@ -275,8 +280,10 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
 }
 .mobile-menu li {
   margin: 1rem 0;
+  width: 100%; /* Changed from fit-content to 100% for better mobile layout */
+  text-align: center; /* Center content inside list item */
 }
-.mobile-menu a {
+.mobile-menu a, .mobile-menu button {
   font-family:'Syne',sans-serif;
   color:var(--text-light);
   font-size:1.8rem;
@@ -285,10 +292,45 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
   text-transform: uppercase;
   letter-spacing: 2px;
   transition: color 0.3s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  display: block; /* Make links/buttons take full width */
 }
-.mobile-menu a:hover {
+.mobile-menu a:hover, .mobile-menu button:hover {
   color:var(--page-accent);
 }
+/* Specific styling for buttons and search input inside mobile menu */
+.mobile-menu-action {
+    width: 100%;
+    max-width: 300px; /* Max width for action items */
+    margin: 1rem auto; /* Center these items */
+}
+.mobile-menu-action .btn { /* Specific styling for buttons inside mobile menu */
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    margin-top: 0.5rem; /* Add some margin above buttons */
+    width: 100%;
+}
+/* Mobile search input styling */
+.mobile-menu .mobile-search-input {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 6px;
+  background: var(--dark-bg3);
+  color: var(--text-light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.8px;
+  outline: none;
+  transition: border-color .3s, box-shadow .3s;
+  margin-bottom: 0.5rem; /* Spacing below search */
+}
+.mobile-menu .mobile-search-input::placeholder {color: var(--gray2);}
+.mobile-menu .mobile-search-input:focus {border-color: var(--page-accent);box-shadow: 0 0 0 3px rgba(0,230,118,0.2);}
+
 
 .btn{
   display:inline-flex;
@@ -565,6 +607,35 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
   filter: brightness(0.85);
   border-radius:10px;
 }
+.video-section-header { /* Common style for video section headings */
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.video-section-header.left {
+    text-align: left;
+}
+.video-section-header h3 {
+    font-family:'Syne',sans-serif;
+    font-size:clamp(1.8rem,3vw,2.5rem);
+    font-weight:800;
+    color:var(--text-light);
+    margin-bottom:1rem;
+}
+.video-section-header h3 span {
+    color: var(--page-accent);
+}
+.video-section-header p {
+    font-size:1rem;
+    color:var(--text-secondary);
+    line-height:1.7;
+    max-width:700px;
+    margin:0 auto;
+}
+.video-section-header.left p {
+    margin-left: 0;
+    margin-right: auto;
+}
+
 
 /* SERVICE GRID */
 .svc-grid{
@@ -574,7 +645,7 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
   margin-top:3.5rem;
 }
 .svc-card{
-  background:var(--dark-bg3);
+  background:var(--dark-bg3); /* Use base dark-bg3 */
   padding:2.2rem 1.8rem;
   border-top:4px solid transparent; /* Thicker border */
   transition:all .4s cubic-bezier(.175,.885,.32,1.275);
@@ -584,6 +655,10 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
   border-radius:10px;
   box-shadow:0 8px 25px rgba(0,0,0,0.2);
 }
+body[data-page-theme="services"] .svc-card {
+    background: var(--dark-bg3-services); /* Override for services page */
+}
+
 .svc-card::before{
   content:'';
   position:absolute;
@@ -922,6 +997,7 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
 .content-section a {
     text-decoration:none;
     transition:color .3s;
+    color:var(--page-accent); /* Dynamic color for links within content */
 }
 .content-section a:hover {
     color:var(--accent-light);
@@ -974,6 +1050,7 @@ nav.scrolled{background:rgba(10,10,14,0.95);border-bottom:1px solid rgba(255,255
   box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 .pw:hover{
+  border-top-color:var(--page-accent);
   transform:translateY(-5px);
   box-shadow:0 8px 20px rgba(0,0,0,0.25);
 }
@@ -1073,7 +1150,7 @@ footer .container{
   width:100%;
   position:relative;
   animation:slideUp .4s cubic-bezier(.175,.885,.32,1.275);
-  border-top:4px solid var(--page-accent);
+  border-top:4px solid var(--page-accent); /* Dynamic border color */
   text-align:left;
   border-radius:10px;
   box-shadow:0 15px 40px rgba(0,0,0,0.4);
@@ -1108,13 +1185,21 @@ footer .container{
     max-width: 600px;
 }
 #purchase-modal .payment-options label {
-    display: block;
+    display: flex; /* Changed to flex for alignment */
+    align-items: center;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.3rem 0;
+}
+#purchase-modal .payment-options label:hover {
+    color: var(--text-light);
 }
 #purchase-modal .payment-options input[type="radio"] {
-    margin-right: 0.5rem;
+    margin-right: 0.8rem;
+    transform: scale(1.2); /* Slightly larger radio buttons */
+    accent-color: var(--page-accent); /* Dynamic color for radio button */
 }
 #purchase-modal .payment-details {
     background: var(--dark-bg4);
@@ -1162,9 +1247,9 @@ footer .container{
 /* RESPONSIVE */
 @media(max-width:1024px){
   .n-links{display:none;} /* Hide desktop nav links on smaller screens */
-  .hamburger{display:block;order:3;} /* Show hamburger */
-  .n-actions{flex-wrap:wrap;justify-content:flex-end;width:auto;}
-  .n-search-input{width:100%;margin-top:0.8rem; order:-1;}
+  .hamburger{display:block;order:3;} /* Show hamburger, push to right */
+  #desktop-actions{display:none;} /* Hide desktop actions completely on mobile */
+
   .hero{grid-template-columns:1fr; padding-top:2rem;}
   .hero-l{padding-bottom:2rem;}
   .hero-r{height:350px; margin-top:2rem; padding:0;}
@@ -1232,11 +1317,7 @@ footer .container{
   .hero-r{height:250px;}
   .hero-slide-text{font-size:1.4rem;}
   .hero-slide-text span{font-size:0.8rem;}
-  .n-actions{flex-direction:column;gap:0.5rem;width:100%;align-items:stretch;}
-  .n-search-input{margin-top:0.5rem;width:100%;}
-  .n-call, .n-cta{width:100%;}
-  .btn-wa{width:100%;}
-  .hero-btns{flex-direction:column;gap:0.5rem;}
+  /* n-actions is already hidden, so no need for specific rules for its elements here */
   .calc-item{flex-direction:column;align-items:flex-start;gap:0.2rem;}
   .ci-label{font-size:0.8rem;}
   .ci-val{font-size:1.1rem;}
@@ -1276,19 +1357,23 @@ footer .container{
     <li><a href="#" onclick="showPage('blog')">Blog</a></li>
     <li><a href="#" onclick="showPage('faq')">FAQ</a></li>
   </ul>
-  <div class="n-actions">
-    <input type="text" class="n-search-input" placeholder="Search..." id="n-search">
-    <a href="tel:03184195665" class="btn btn-ghost">📞 Call Now</a>
-    <button class="btn btn-sun" onclick="showPage('book-quote')">Get Free Quote</button>
-  </div>
+  <!-- Hamburger for mobile, visible above 1024px but hidden, then shown via media query -->
   <div class="hamburger" id="hamburger">
     <span></span>
     <span></span>
     <span></span>
   </div>
+  <!-- Desktop Actions - will be hidden on mobile via CSS -->
+  <div class="n-actions" id="desktop-actions">
+    <input type="text" class="n-search-input" placeholder="Search..." id="n-search">
+    <a href="tel:03184195665" class="btn btn-ghost">📞 Call Now</a>
+    <button class="btn btn-sun" onclick="showPage('book-quote')">Get Free Quote</button>
+  </div>
 </nav>
 
 <ul class="mobile-menu" id="mobile-menu">
+  <!-- Search, Call, Get Free Quote are now part of the mobile menu -->
+  <li class="mobile-menu-action"><input type="text" class="n-search-input mobile-search-input" placeholder="Search..." id="mobile-n-search"></li>
   <li><a href="#" onclick="showPage('home')">Home</a></li>
   <li><a href="#" onclick="showPage('about')">About Us</a></li>
   <li><a href="#" onclick="showPage('services')">Services</a></li>
@@ -1298,8 +1383,8 @@ footer .container{
   <li><a href="#" onclick="showPage('contact')">Contact</a></li>
   <li><a href="#" onclick="showPage('blog')">Blog</a></li>
   <li><a href="#" onclick="showPage('faq')">FAQ</a></li>
-  <li><button class="btn btn-sun" onclick="showPage('book-quote')">Get Free Quote</button></li>
-  <li><a href="tel:03184195665" class="btn btn-ghost">Call Now</a></li>
+  <li class="mobile-menu-action"><button class="btn btn-sun" onclick="showPage('book-quote')">Get Free Quote</button></li>
+  <li class="mobile-menu-action"><a href="tel:03184195665" class="btn btn-ghost">Call Now</a></li>
 </ul>
 
 
@@ -1389,13 +1474,12 @@ footer .container{
 <!-- FEATURED VIDEO SECTION -->
 <section class="sec">
   <div class="container">
-    <div style="text-align:center;margin-bottom:3rem;" class="sr">
+    <div class="video-section-header sr">
       <span class="eyebrow">✦ Our Vision in Motion</span>
-      <h2 class="sec-title">Powering Multan, One <span>Panel at a Time</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Watch our installations, explore our technology, and hear stories from our happy clients.</p>
+      <h3>Powering Multan, One <span>Panel at a Time</span></h3>
+      <p style="margin:0 auto">Watch our installations, explore our technology, and hear stories from our happy clients.</p>
     </div>
     <div class="video-grid">
-
       <div class="video-wrapper sr">
         <iframe
           src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
@@ -1404,7 +1488,6 @@ footer .container{
           allowfullscreen>
         </iframe>
       </div>
-
       <div class="video-wrapper sr d1">
         <iframe
           src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
@@ -1413,11 +1496,9 @@ footer .container{
           allowfullscreen>
         </iframe>
       </div>
-
     </div>
   </div>
 </section>
-
 
 
 <!-- BRANDS/PARTNERS TICKER -->
@@ -1523,9 +1604,9 @@ footer .container{
       <h3>Commercial & Industrial Solar</h3>
       <p>For businesses and factories, solar energy is not just eco-friendly but also a smart financial investment. Our commercial and industrial solar systems significantly reduce your operating costs, increase profitability, and provide energy independence.</p>
       <ul>
-        <li><strong>Large-Scale Installations:</b> Projects from 20kW to MW level.</li>
+        <li><strong>Large-Scale Installations:</strong> Projects from 20kW to MW level.</li>
         <li><strong>Energy Audits:</strong> Customized solutions based on your specific energy consumption.</li>
-        <li><strong>Quick ROI:</b> Recover your investment quickly.</li>
+        <li><strong>Quick ROI:</strong> Recover your investment quickly.</li>
         <li><strong>Reduced Operational Costs:</strong> Eliminate reliance on diesel generators.</li>
         <li><strong>Sustainable Business Image:</strong> Enhance your brand image by using green energy.</li>
       </ul>
@@ -1533,10 +1614,12 @@ footer .container{
     </div>
 
     <!-- Services Page Video Section -->
-    <div class="content-section sr" style="text-align:center;">
-        <span class="eyebrow">✦ Our Work in Action</span>
-        <h3 class="sec-title">See Our <span>Services Delivered</span></h3>
-        <p class="sec-sub" style="margin:0 auto 2rem;">Witness the precision and quality we put into every solar installation.</p>
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Our Work in Action</span>
+            <h3>See Our <span>Services Delivered</span></h3>
+            <p style="margin:0 auto 2rem;">Witness the precision and quality we put into every solar installation.</p>
+        </div>
         <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
           <div class="video-wrapper">
             <iframe
@@ -1591,7 +1674,7 @@ footer .container{
         <li><strong>Growatt:</strong> Industry leader for residential and commercial inverters.</li>
         <li><strong>Solis:</strong> High-efficiency and reliable string inverters.</li>
         <li><strong>Huawei:</strong> Smart PV solutions with AI integration.</li>
-        <li><strong>SolarEdge:</b> Optimized inverter solutions for maximum energy production.</li>
+        <li><strong>SolarEdge:</strong> Optimized inverter solutions for maximum energy production.</li>
       </ul>
       <p>Choose the best inverter according to your needs; our experts are available to assist you.</p>
     </div>
@@ -1608,11 +1691,13 @@ footer .container{
     </div>
 
     <!-- Products Page Video Section -->
-    <div class="content-section sr" style="text-align:center;">
-        <span class="eyebrow">✦ Quality Products in Detail</span>
-        <h3 class="sec-title">Understanding Your <span>Solar Components</span></h3>
-        <p class="sec-sub" style="margin:0 auto 2rem;">A closer look at the advanced technology powering our solar systems.</p>
-        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr left">
+            <span class="eyebrow">✦ Quality Products in Detail</span>
+            <h3>Understanding Your <span>Solar Components</span></h3>
+            <p style="margin-bottom:2rem;">A closer look at the advanced technology powering our solar systems.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px; margin-left:0; margin-right:auto;">
           <div class="video-wrapper">
             <iframe
               src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
@@ -1701,14 +1786,33 @@ footer .container{
     <!-- More Project Categories -->
     <div class="content-section sr">
       <h3>Residential Project Highlights</h3>
-      <p>Explore more images of our residential solar installations, featuring work on various homes and roof types across Multan.</p>
-      <!-- Add more specific residential images here if needed -->
+      <p>Explore more images of our residential solar installations, featuring work on various homes and roof types across Multan. We pride ourselves on clean, efficient installations that blend seamlessly with your home's aesthetics while maximizing energy capture.</p>
     </div>
     <div class="content-section sr">
       <h3>Commercial & Industrial Success Stories</h3>
-      <p>Get inspired for your business. View images of our commercial and industrial solar projects, including shops, offices, and small factories.</p>
+      <p>Get inspired for your business. View images of our commercial and industrial solar projects, including shops, offices, and small factories. Our large-scale solutions are designed to deliver significant ROI and energy independence for your operations.</p>
       <p>Read more about our business solutions on the <a href="#" onclick="showPage('services')">Services page</a>.</p>
     </div>
+
+    <!-- Projects Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Our Recent Milestones</span>
+            <h3>Featured <span>Project Walkthrough</span></h3>
+            <p style="margin:0 auto 2rem;">A detailed look at one of our most successful industrial solar installations.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -1757,6 +1861,26 @@ footer .container{
         <div class="calc-item"><span class="ci-label">25 Year Total Saving</span><span class="ci-val" id="r-total">—</span></div>
       </div>
     </div>
+
+    <!-- Calculator Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr left">
+            <span class="eyebrow">✦ Maximize Your Savings</span>
+            <h3>Understanding Your <span>Solar Investment</span></h3>
+            <p style="margin-bottom:2rem;">Learn how our solar systems provide the best return on investment and long-term savings.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px; margin-left:0; margin-right:auto;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -1781,14 +1905,32 @@ footer .container{
     <!-- More detailed galleries -->
     <div class="content-section sr">
       <h3>Residential Solar Gallery</h3>
-      <p>View more images of our residential solar installations, featuring various homes and roof types.</p>
-      <!-- Add more specific residential images here if needed -->
+      <p>View more images of our residential solar installations, featuring various homes and roof types. Our gallery showcases the versatility and aesthetic integration of solar solutions for every unique home design.</p>
     </div>
     <div class="content-section sr">
       <h3>Commercial Solar Gallery</h3>
-      <p>Find inspiration for your business. Explore images of our commercial solar projects, including shops, offices, and small factories.</p>
-      <!-- Add more specific commercial images here if needed -->
+      <p>Find inspiration for your business. Explore images of our commercial solar projects, including shops, offices, and small factories. See how we deliver robust, high-capacity solar systems that meet the demanding energy needs of businesses.</p>
     </div>
+
+    <!-- Gallery Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Behind the Scenes</span>
+            <h3>Our Installation <span>Process</span></h3>
+            <p style="margin:0 auto 2rem;">A quick video showcasing our skilled team at work, ensuring every panel is installed with precision and care.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -1813,6 +1955,26 @@ footer .container{
     <div style="text-align:center;margin-top:2rem;">
       <button class="btn btn-ghost" onclick="openModal('Submit a Review')">Submit Your Review →</button>
     </div>
+
+    <!-- Testimonials Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem;">
+        <div class="video-section-header sr left">
+            <span class="eyebrow">✦ Real Stories, Real Impact</span>
+            <h3>Hear From Our <span>Satisfied Clients</span></h3>
+            <p style="margin-bottom:2rem;">Watch video testimonials from customers who achieved energy independence with City of Saints Solar.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px; margin-left:0; margin-right:auto;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -1851,7 +2013,7 @@ footer .container{
           <ul style="max-width:800px; margin:0 auto; text-align:left;">
               <li><strong>Customer Focus:</strong> Client satisfaction is our top priority.</li>
               <li><strong>Innovation:</strong> Embracing the latest solar technologies.</li>
-              <li><strong>Integrity:</b> Honesty and transparency in all our work.</li>
+              <li><strong>Integrity:</strong> Honesty and transparency in all our work.</li>
               <li><strong>Sustainability:</strong> Providing eco-friendly solutions.</li>
               <li><strong>Quality Excellence:</strong> Delivering the best products and services.</li>
           </ul>
@@ -1888,6 +2050,26 @@ footer .container{
         <p class="tm-desc">Expert in customer relations, helping clients find the perfect solar solution for their needs and budget.</p>
       </div>
     </div>
+
+    <!-- About Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Our Journey</span>
+            <h3>A Glimpse into Our <span>Company Culture</span></h3>
+            <p style="margin:0 auto 2rem;">Discover what makes City of Saints Solar a great place to work and a trusted partner for our clients.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -1948,15 +2130,35 @@ footer .container{
     </div>
     <div class="loc-grid">
       <div class="loc-info sr">
-        <div class="ci-card"><div class="ci-icon">📍</div><div><div class="ci-label">Address</div><div class="ci-val">Multan, Punjab, Pakistan</div></div></a>
-        <div class="ci-card"><div class="ci-icon">📞</div><div><div class="ci-label">Phone</div><div class="ci-val">0318-4195665</div></div></a>
-        <div class="ci-card"><div class="ci-icon">⏰</div><div><div class="ci-label">Office Hours</div><div class="ci-val">Mon–Sat: 9AM – 6PM</div></div></a>
+        <div class="ci-card"><div class="ci-icon">📍</div><div><div class="ci-label">Address</div><div class="ci-val">Multan, Punjab, Pakistan</div></div></div>
+        <div class="ci-card"><div class="ci-icon">📞</div><div><div class="ci-label">Phone</div><div class="ci-val">0318-4195665</div></div></div>
+        <div class="ci-card"><div class="ci-icon">⏰</div><div><div class="ci-label">Office Hours</div><div class="ci-val">Mon–Sat: 9AM – 6PM</div></div></div>
         <div class="ci-card"><div class="ci-icon">🚗</div><div><div class="ci-label">Free Site Survey</div><div class="ci-val">We Come to You — Free!</div></div></div>
       </div>
       <div class="loc-frame sr d2">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d108962.49!2d71.418!3d30.157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3922b7a878c45c67%3A0x6e9cf7f15dc1e99c!2sMultan%2C+Punjab%2C+Pakistan!5e0!3m2!1sen!2spk!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d108962.49!2d71.418!3d30.157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3922b7a878c45c67%3A0x6e9cf7f15dc1e99c!2sMultan%2C+Punjab%2C+Pakistan!5e0!3m2!1sen&2spk!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
       </div>
     </div>
+
+    <!-- Contact Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ We're Here to Help</span>
+            <h3>Your Path to <span>Solar Starts Here</span></h3>
+            <p style="margin:0 auto 2rem;">A short video explaining our commitment to customer support and how easy it is to reach us.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -2064,6 +2266,26 @@ footer .container{
         </button>
       </div>
     </div>
+
+    <!-- Book Quote Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Your Future, Powered</span>
+            <h3>Visualizing Your <span>Solar Transformation</span></h3>
+            <p style="margin:0 auto 2rem;">See examples of custom solar solutions and how they can benefit you.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -2075,27 +2297,67 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Frequently Asked Questions</span>
       <h2 class="sec-title">Solar <span>FAQs</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Find answers to all your questions here.</p>
+      <p class="sec-sub" style="margin:0 auto">Find answers to all your questions here. If you can't find what you're looking for, feel free to contact us!</p>
     </div>
     <div class="quote-wrap sr" style="margin-top:3.5rem;">
       <div class="content-section" style="border-top:none; margin-top:0;">
         <h3>General Solar Questions</h3>
-        <p><strong>Q: What is solar energy?</strong><br>A: Solar energy is a method of generating electricity from sunlight. Solar panels absorb sunlight and convert it into electricity.</p>
-        <p><strong>Q: What types of solar systems are there?</strong><br>A: There are three main types: On-Grid (connected to the utility grid), Off-Grid (independent from the grid with battery backup), and Hybrid (a combination of both).</p>
-        <p><strong>Q: How can I get a zero electricity bill?</strong><br>A: With an On-Grid system, if your solar production exceeds your consumption, you can sell the extra electricity to the utility through "Net Metering" to reduce your bill to zero.</p>
+        <p><strong>Q: What is solar energy and how does it work?</strong><br>A: Solar energy is electricity generated from sunlight using photovoltaic (PV) panels. These panels absorb photons from the sun and convert them into direct current (DC) electricity. An inverter then converts this DC electricity into alternating current (AC) electricity, which is what your home or business uses.</p>
+        <p><strong>Q: What types of solar systems are there? Which is right for me?</strong><br>A: There are three main types:
+            <ul>
+                <li><strong>On-Grid (Grid-Tied):</strong> Connected to the utility grid. Ideal for stable grid areas. Allows you to sell excess electricity back to the grid (Net Metering) to achieve zero bills.</li>
+                <li><strong>Off-Grid:</strong> Completely independent from the grid with battery backup. Best for remote areas or those experiencing frequent, long load shedding, providing 24/7 power independence.</li>
+                <li><strong>Hybrid:</strong> Combines elements of both on-grid and off-grid systems. It's connected to the grid and also has battery storage. This offers the benefits of net metering while also providing backup power during outages. Often considered the best value.</li>
+            </ul>
+            Our free site survey helps determine the best system for your specific needs.
+        </p>
+        <p><strong>Q: How can I achieve a zero electricity bill?</strong><br>A: With an appropriately sized On-Grid or Hybrid solar system and a Net Metering agreement with your utility company (like WAPDA in Multan), you can export any excess electricity your panels produce back to the grid. This generation offsets your consumption, leading to a significantly reduced or even zero electricity bill over time.</p>
+        <p><strong>Q: Is Multan suitable for solar energy?</strong><br>A: Absolutely! Multan experiences abundant sunshine throughout the year, making it an excellent location for solar power generation. The high temperatures actually make solar a more attractive option compared to relying on expensive grid electricity or noisy, polluting generators.</p>
       </div>
       <div class="content-section">
         <h3>Installation & Maintenance</h3>
-        <p><strong>Q: How long does solar system installation take?</strong><br>A: For residential homes, it usually takes 2-3 days. Commercial or industrial projects may take longer, depending on the project size.</p>
-        <p><strong>Q: How are solar panels cleaned?</strong><br>A: Panels should be regularly cleaned with water and a soft brush to maintain their efficiency. Our AMC service includes professional cleaning.</p>
-        <p><strong>Q: Will a solar system work during load shedding?</strong><br>A: On-Grid systems shut down during grid outages for safety reasons. However, Off-Grid and Hybrid systems provide electricity during load shedding with battery backup.</p>
+        <p><strong>Q: How long does solar system installation take?</strong><br>A: For residential homes (typically 3kW to 20kW), installation usually takes between 2 to 4 days, depending on system complexity and roof structure. Larger commercial or industrial projects will naturally take longer, but we always strive for efficient and timely completion with minimal disruption.</p>
+        <p><strong>Q: How are solar panels cleaned and maintained?</strong><br>A: Solar panels should be regularly cleaned (ideally monthly or bi-monthly) with water and a soft brush or squeegee to remove dust, dirt, and bird droppings that can reduce efficiency. Our Annual Maintenance Contract (AMC) service includes professional cleaning, performance monitoring, and any necessary repairs to keep your system operating at peak performance. Inverters also require occasional checks and firmware updates.</p>
+        <p><strong>Q: Will a solar system work during load shedding?</strong><br>A:
+            <ul>
+                <li><strong>On-Grid systems:</strong> For safety reasons (to prevent back-feeding electricity into a downed grid and endangering utility workers), grid-tied systems automatically shut down during grid outages.</li>
+                <li><strong>Off-Grid and Hybrid systems:</strong> These systems are designed with battery backup and can continue to provide electricity to your property during load shedding, ensuring uninterrupted power supply.</li>
+            </ul>
+        </p>
+        <p><strong>Q: What is net metering and how does it benefit me?</strong><br>A: Net metering is a billing mechanism that credits solar energy system owners for the electricity they add to the grid. When your solar panels produce more electricity than you use, the excess is sent to the grid, and your meter runs backward (or a separate meter records exports). You typically receive credits on your electricity bill, which can offset future consumption or even result in a zero bill if your production consistently matches or exceeds your usage.</p>
       </div>
       <div class="content-section">
         <h3>Cost & Savings</h3>
-        <p><strong>Q: How much does it cost to install a solar system?</strong><br>A: The cost depends on the system size (kW), panel and inverter quality, and batteries. We offer a free site survey and a customized quote.</p>
-        <p><strong>Q: What warranty do solar systems come with?</strong><br>A: Our panels have a 25-year performance warranty, and inverters come with a 5-10 year product warranty. Our installations also include a 10-year service warranty.</p>
-        <p><strong>Q: Are installment plans available for solar systems?</strong><br>A: Yes, we offer easy installment plans in collaboration with our bank partners.</p>
+        <p><strong>Q: How much does it cost to install a solar system in Multan?</strong><br>A: The cost of a solar system varies significantly based on several factors: the system size (kW capacity), the type of system (On-Grid, Off-Grid, Hybrid), the quality and brand of panels and inverters (Tier-1 brands are recommended), and whether battery storage is included. We offer a completely free site survey and provide a transparent, customized quote after assessing your specific energy needs and property. Our goal is to offer the most competitive prices in Multan without compromising on quality or warranty.</p>
+        <p><strong>Q: What kind of warranty do solar systems from City of Saints Solar come with?</strong><br>A: We stand by the quality of our installations and products:
+            <ul>
+                <li><strong>Solar Panels:</strong> Typically come with a 25-year linear power output warranty (guaranteeing a certain percentage of original power output over time) and a 10-12 year product warranty.</li>
+                <li><strong>Inverters:</strong> Our premium inverters carry a manufacturer's product warranty ranging from 5 to 10 years.</li>
+                <li><strong>Installation:</strong> We provide a comprehensive 10-year service and performance warranty on our complete solar installations.</li>
+            </ul>
+        </p>
+        <p><strong>Q: Are installment plans available for solar systems?</strong><br>A: Yes, we understand that a solar investment can be substantial. We offer flexible and easy installment plans in collaboration with leading bank partners. Our team can guide you through the process to find a payment solution that fits your budget.</p>
+        <p><strong>Q: What is the average ROI (Return on Investment) for a solar system?</strong><br>A: The typical ROI period for a solar system in Multan can range from 2 to 4 years, depending on your electricity consumption, current tariff rates, and initial system cost. After the ROI period, the electricity generated by your system is essentially free, leading to massive savings over the system's 25+ year lifespan.</p>
       </div>
+    </div>
+
+    <!-- FAQ Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Answered!</span>
+            <h3>Common Solar <span>Myths Debunked</span></h3>
+            <p style="margin:0 auto 2rem;">Watch our expert address common misconceptions about solar energy and its benefits.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
     </div>
   </div>
 </section>
@@ -2108,30 +2370,61 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Latest Updates</span>
       <h2 class="sec-title">Our Blog & <span>News</span></h2>
-      <p class="sec-sub" style="margin:0 auto">The latest news and tips from the world of solar energy.</p>
+      <p class="sec-sub" style="margin:0 auto">The latest news, insights, and tips from the world of solar energy and sustainable living in Multan.</p>
     </div>
     <div class="test-grid blog-grid" style="margin-top:3.5rem;"> <!-- Reusing test-grid for layout -->
       <div class="blog-post sr">
-        <h4>The Future of Solar Energy in Multan</h4>
+        <h4>The Future of Solar Energy in Multan: A Brighter Tomorrow</h4>
         <span class="date">April 1, 2025</span>
-        <p>The future of solar energy in Multan is bright. With government policies and increased awareness, solar adoption is rapidly growing...</p>
+        <p>The future of solar energy in Multan is undeniably bright. With rising electricity costs, increasing environmental awareness, and supportive government initiatives, solar adoption is rapidly growing across residential, commercial, and industrial sectors. We explore the key trends and predictions for Multan's solar landscape.</p>
         <a href="#" >Read More →</a>
       </div>
       <div class="blog-post sr d1">
-        <h4>5 Tips to Maximize Your Solar Savings</h4>
+        <h4>5 Essential Tips to Maximize Your Solar Savings in Pakistan</h4>
         <span class="date">March 15, 2025</span>
-        <p>Key tips to get the most out of your solar system: panel cleaning, energy consumption monitoring, and more...</p>
+        <p>Getting a solar system is just the first step. To truly unlock its full potential and maximize your savings, certain practices are crucial. This article outlines 5 key tips, including regular panel cleaning, smart energy consumption monitoring, and understanding your net metering benefits, to help you get the most out of your investment.</p>
         <a href="#" >Read More →</a>
       </div>
       <div class="blog-post sr d2">
-        <h4>Hybrid Solar: The Best of Both Worlds</h4>
+        <h4>Hybrid Solar Systems: The Best of Both Worlds for Multan Homes</h4>
         <span class="date">February 28, 2025</span>
-        <p>A hybrid solar system combines the benefits of both on-grid and off-grid. Learn how it saves you from load shedding and high bills...</p>
+        <p>Load shedding and grid instability are common challenges. A hybrid solar system offers a robust solution by combining the benefits of both on-grid and off-grid setups. Learn how this advanced system provides seamless power during outages while allowing you to benefit from net metering and significantly reduce your electricity bills. It's the ultimate energy independence solution!</p>
+        <a href="#" >Read More →</a>
+      </div>
+      <div class="blog-post sr d3">
+        <h4>Investing in Solar: A Smart Financial Move for Businesses in South Punjab</h4>
+        <span class="date">February 10, 2025</span>
+        <p>For businesses, high operational costs directly impact profitability. Solar energy presents a compelling financial solution, offering rapid return on investment and protection against volatile energy prices. Discover how commercial and industrial solar installations can transform your business's bottom line and enhance its sustainability profile.</p>
+        <a href="#" >Read More →</a>
+      </div>
+      <div class="blog-post sr d4">
+        <h4>Understanding Solar Panel Efficiency: What You Need to Know</h4>
+        <span class="date">January 20, 2025</span>
+        <p>Solar panel efficiency is a critical factor when choosing a system. This article delves into what efficiency ratings mean, the different technologies (Mono PERC, Bifacial, Half-Cut), and how to select the most suitable panels for your specific needs and roof space to ensure maximum energy production.</p>
         <a href="#" >Read More →</a>
       </div>
     </div>
     <div style="text-align:center;margin-top:2rem;">
       <button class="btn btn-ghost" onclick="showPage('contact')">Suggest a Topic →</button>
+    </div>
+
+    <!-- Blog Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr left">
+            <span class="eyebrow">✦ Stay Informed</span>
+            <h3>Our Latest <span>Solar Insights</span></h3>
+            <p style="margin-bottom:2rem;">Watch our experts discuss the latest trends and breakthroughs in renewable energy.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px; margin-left:0; margin-right:auto;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
     </div>
   </div>
 </section>
@@ -2144,31 +2437,55 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Join Our Team</span>
       <h2 class="sec-title">Build Your Career with <span>City of Saints Solar</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Build your future with our rapidly growing company.</p>
+      <p class="sec-sub" style="margin:0 auto">At City of Saints Solar, we're not just installing solar panels; we're building a sustainable future for Multan. Join our rapidly growing team and be a part of the energy revolution in Pakistan!</p>
     </div>
     <div class="quote-wrap sr" style="margin-top:3.5rem;">
       <div class="content-section" style="border-top:none; margin-top:0;">
         <h3>Why Work With Us?</h3>
-        <p>At City of Saints Solar, we don't just install panels; we lay the foundation for a brighter future. We offer talented individuals opportunities to learn, grow, and be part of the solar energy revolution.</p>
+        <p>We are a leading solar company in Multan committed to excellence, innovation, and customer satisfaction. We believe in empowering our employees with the tools, training, and environment they need to succeed and grow professionally. Here’s what sets us apart:</p>
         <ul>
-          <li>Competitive Salary & Benefits</li>
-          <li>Professional Growth Opportunities</li>
-          <li>Dynamic & Supportive Work Environment</li>
-          <li>Contribute to a Greener Pakistan</li>
+          <li><strong>Competitive Salary & Benefits:</strong> Attractive compensation packages, health benefits, and performance bonuses.</li>
+          <li><strong>Professional Growth Opportunities:</strong> Continuous learning, training programs, and clear career paths in a fast-evolving industry.</li>
+          <li><strong>Dynamic & Supportive Work Environment:</strong> Collaborate with a passionate team dedicated to making a positive impact.</li>
+          <li><strong>Contribute to a Greener Pakistan:</strong> Be proud of your work, knowing you're helping reduce carbon emissions and promote clean energy.</li>
+          <li><strong>Innovation at Core:</strong> Work with cutting-edge solar technologies and solutions.</li>
         </ul>
+        <p>If you are passionate about renewable energy and looking for a challenging yet rewarding career, City of Saints Solar is the place for you.</p>
       </div>
       <div class="content-section">
         <h3>Current Openings</h3>
-        <p>Currently, we are looking for passionate individuals to fill the following roles:</p>
+        <p>Currently, we are looking for passionate and skilled individuals to fill the following roles. We encourage dedicated professionals to apply, even if your specific role isn't listed, as we're always looking for talent!</p>
         <ul>
-          <li><strong>Solar Sales Executive:</strong> Experience in solar sales preferred.</li>
-          <li><strong>Electrical Engineer (Solar Focus):</strong> PEC certified, 2+ years experience.</li>
-          <li><strong>Solar Technician:</strong> Hands-on experience with installations.</li>
-          <li><strong>Customer Support Representative:</b> Excellent communication skills.</li>
+          <li><strong>Solar Sales Executive:</strong> Seeking enthusiastic individuals with proven experience in solar sales and strong communication skills. Must be target-oriented and customer-focused.</li>
+          <li><strong>Electrical Engineer (Solar Focus):</strong> PEC certified engineers with 2+ years of experience in solar system design, installation, and commissioning. Knowledge of latest solar technologies and net metering regulations is essential.</li>
+          <li><strong>Solar Technician:</strong> Hands-on experience with solar panel installation, wiring, and maintenance. Must be proficient in safety protocols and quality standards.</li>
+          <li><strong>Customer Support Representative:</strong> Excellent verbal and written communication skills to handle customer inquiries, provide technical support, and ensure high levels of client satisfaction. Prior experience in technical support is a plus.</li>
+          <li><strong>Marketing Specialist:</strong> Creative and driven individual with experience in digital marketing, content creation, and lead generation, specifically in the renewable energy sector.</li>
         </ul>
-        <p>To apply, please send your resume to <a href="mailto:careers@cityofsaintssolar.com" >careers@cityofsaintssolar.com</a> or contact us directly.</p>
+        <p>To apply for any of these positions or to inquire about future opportunities, please send your detailed resume and a cover letter explaining your interest to <a href="mailto:careers@cityofsaintssolar.com" >careers@cityofsaintssolar.com</a> or contact us directly via phone.</p>
+        <p>We are an equal opportunity employer and value diversity at our company. We do not discriminate on the basis of race, religion, color, national origin, gender, sexual orientation, age, marital status, veteran status, or disability status.</p>
       </div>
     </div>
+
+    <!-- Careers Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Grow With Us</span>
+            <h3>A Day in the Life at <span>City of Saints Solar</span></h3>
+            <p style="margin:0 auto 2rem;">Watch our team in action and learn more about the vibrant work environment we offer.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+    </div>
+
   </div>
 </section>
 </div>
@@ -2180,18 +2497,57 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Legal Information</span>
       <h2 class="sec-title">Privacy <span>Policy</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Your data protection is our responsibility.</p>
+      <p class="sec-sub" style="margin:0 auto">Your data protection and privacy are of utmost importance to us. This policy outlines how we collect, use, and safeguard your personal information.</p>
     </div>
     <div class="quote-wrap sr" style="margin-top:3.5rem;">
       <div class="content-section" style="border-top:none; margin-top:0;">
         <h3>Information We Collect</h3>
-        <p>We collect personal information such as your name, phone number, email address, and location when you use our services or fill out forms.</p>
+        <p>We collect personal information from you through various touchpoints to provide and improve our services. This information may include:</p>
+        <ul>
+          <li><strong>Contact Details:</strong> Your name, phone number, email address, and physical address when you fill out forms (e.g., quote request, contact form, purchase order), subscribe to our newsletter, or contact us directly.</li>
+          <li><strong>Property Details:</strong> Information related to your property (e.g., electricity bill details, units consumed, property type) when you use our solar calculator or request a site survey.</li>
+          <li><strong>Communication Data:</strong> Records of your interactions with us, including emails, WhatsApp messages, and phone calls.</li>
+          <li><strong>Website Usage Data:</strong> Non-personally identifiable information such as IP address, browser type, pages visited, and time spent on our site, collected via cookies and analytics tools to enhance user experience.</li>
+        </ul>
+        <p>We do not collect sensitive personal data without your explicit consent.</p>
         <h3>How We Use Your Information</h3>
-        <p>We use your information to provide quotes, deliver services, offer customer support, and improve our services. We do not share your information without your permission.</p>
+        <p>The information we collect is used solely for legitimate business purposes, including:</p>
+        <ul>
+          <li>To provide you with accurate solar quotes and personalized service proposals.</li>
+          <li>To process your product orders and arrange for delivery and installation.</li>
+          <li>To offer customer support, respond to your inquiries, and address any concerns.</li>
+          <li>To improve our website, services, and product offerings through data analysis.</li>
+          <li>To send you marketing communications (if you have opted-in) about new products, services, or promotions.</li>
+          <li>To comply with legal obligations and enforce our terms and conditions.</li>
+        </ul>
+        <p>We assure you that we do not sell, rent, or trade your personal information to third parties without your explicit permission, except where necessary to fulfill our services (e.g., sharing delivery address with a logistics partner).</p>
         <h3>Data Security</h3>
-        <p>We implement appropriate security measures to protect your personal information from unauthorized access, disclosure, alteration, and destruction.</p>
-        <p>For any privacy-related queries, please contact us at <a href="mailto:privacy@cityofsaintssolar.com" >privacy@cityofsaintssolar.com</a>.</p>
+        <p>We are committed to protecting your personal information. We implement appropriate technical and organizational security measures to protect against unauthorized access, disclosure, alteration, and destruction of your data. These measures include data encryption, secure servers, and strict access controls.</p>
+        <p>While we strive to protect your data, no method of transmission over the Internet or electronic storage is 100% secure. Therefore, we cannot guarantee absolute security.</p>
+        <h3>Your Rights</h3>
+        <p>You have the right to access, correct, or delete your personal information held by us. You can also object to the processing of your data or request data portability. To exercise any of these rights, please contact us.</p>
+        <p>For any privacy-related queries or to exercise your rights, please contact us at <a href="mailto:privacy@cityofsaintssolar.com" >privacy@cityofsaintssolar.com</a>. We will respond to your request within a reasonable timeframe.</p>
+        <p>This Privacy Policy may be updated periodically. We encourage you to review it regularly for any changes.</p>
       </div>
+    </div>
+
+    <!-- Privacy Policy Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Your Trust, Our Priority</span>
+            <h3>Safeguarding Your <span>Personal Information</span></h3>
+            <p style="margin:0 auto 2rem;">A short video explaining our commitment to data privacy and security for all our clients.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
     </div>
   </div>
 </section>
@@ -2204,18 +2560,53 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Legal Information</span>
       <h2 class="sec-title">Terms & <span>Conditions</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Terms of use for our services.</p>
+      <p class="sec-sub" style="margin:0 auto">These terms and conditions govern your use of our website and services. Please read them carefully before proceeding.</p>
     </div>
     <div class="quote-wrap sr" style="margin-top:3.5rem;">
       <div class="content-section" style="border-top:none; margin-top:0;">
         <h3>Service Agreement</h3>
-        <p>By using our services, you agree to our terms and conditions. This includes installation, maintenance, warranty claims, and payment schedules.</p>
+        <p>By engaging with City of Saints Solar for any services, including but not limited to site surveys, solar system design, installation, maintenance, and product purchases, you agree to enter into a formal service agreement. This agreement will detail:</p>
+        <ul>
+          <li><strong>Scope of Work:</strong> A clear description of the services to be provided.</li>
+          <li><strong>Payment Schedule:</strong> Agreed-upon costs, payment milestones, and acceptable payment methods.</li>
+          <li><strong>Installation Timelines:</strong> Estimated start and completion dates for projects.</li>
+          <li><strong>Customer Responsibilities:</strong> Any actions or preparations required from the client's side.</li>
+          <li><strong>Dispute Resolution:</strong> Procedures for resolving any disagreements.</li>
+        </ul>
+        <p>A signed copy of the service agreement will be provided to you before commencement of any paid services.</p>
         <h3>Warranty Policy</h3>
-        <p>We provide comprehensive warranties on our products and services. For details, please refer to our official warranty policy document.</p>
+        <p>City of Saints Solar is committed to delivering high-quality products and services. Our warranty policy covers:</p>
+        <ul>
+          <li><strong>Product Warranty:</strong> All solar panels, inverters, and batteries supplied by us come with manufacturer-backed warranties (e.g., 25-year performance warranty for panels, 5-10 years for inverters). Details will be specified in your purchase and service agreements.</li>
+          <li><strong>Installation Warranty:</strong> We provide a comprehensive 10-year warranty on the workmanship and structural integrity of our installations. This covers defects arising from our installation process.</li>
+          <li><strong>Exclusions:</strong> Warranties typically do not cover damage caused by natural disasters (force majeure), unauthorized modifications, improper maintenance by the client, or normal wear and tear.</li>
+        </ul>
+        <p>For complete details and terms, please refer to our official warranty policy document provided with your service agreement or request a copy from our team.</p>
         <h3>Limitation of Liability</h3>
-        <p>City of Saints Solar limits its responsibilities regarding its services as stated in our detailed agreement.</p>
-        <p>For more information, please contact our team or request the complete Terms & Conditions document.</p>
+        <p>City of Saints Solar endeavors to provide the best possible services. However, our liability is limited as specified in our detailed service agreements. We shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from (a) your access to or use of or inability to access or use the services; (b) any conduct or content of any third party on the services.</p>
+        <p>We encourage clients to review all agreements thoroughly. For more information, please contact our team or request the complete Terms & Conditions document.</p>
+        <h3>Changes to Terms</h3>
+        <p>We reserve the right to modify these terms and conditions at any time. Any changes will be posted on this page, and your continued use of our services after such modifications constitutes your acceptance of the new terms.</p>
       </div>
+    </div>
+
+    <!-- Terms & Conditions Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Transparency and Trust</span>
+            <h3>Understanding Your <span>Agreement with Us</span></h3>
+            <p style="margin:0 auto 2rem;">This video clarifies key aspects of our terms and conditions, ensuring a clear and trusting partnership.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
     </div>
   </div>
 </section>
@@ -2228,75 +2619,94 @@ footer .container{
     <div class="sr" style="text-align:center">
       <span class="eyebrow">✦ Website Structure</span>
       <h2 class="sec-title">Site <span>Map</span></h2>
-      <p class="sec-sub" style="margin:0 auto">An overview of all pages on our website.</p>
+      <p class="sec-sub" style="margin:0 auto">An overview of all pages and sections available on the City of Saints Solar website, designed to help you navigate easily.</p>
     </div>
     <div class="quote-wrap sr" style="margin-top:3.5rem; text-align:left;">
       <div class="content-section" style="border-top:none; margin-top:0;">
-        <h3>Main Pages</h3>
+        <h3>Main Pages & Sections</h3>
         <ul>
-          <li><a href="#" onclick="showPage('home')">Home</a></li>
-          <li><a href="#" onclick="showPage('about')">About Us</a>
+          <li><a href="#" onclick="showPage('home')">Home</a>: Your starting point for discovering our solar solutions and company overview.</li>
+          <li><a href="#" onclick="showPage('about')">About Us</a>: Learn about our company's journey, mission, values, and the dedicated team behind City of Saints Solar.
             <ul>
-              <li>Our Story</li>
-              <li>Vision & Mission</li>
-              <li>Our Values</li>
-              <li>Our Team</li>
+              <li>Our Story: The history and growth of our company.</li>
+              <li>Vision & Mission: Our commitment to a solar-powered Multan.</li>
+              <li>Our Values: The principles that guide our operations.</li>
+              <li>Our Team: Meet the experts and leaders.</li>
             </ul>
           </li>
-          <li><a href="#" onclick="showPage('services')">Services</a>
+          <li><a href="#" onclick="showPage('services')">Services</a>: Explore our comprehensive range of solar installation and maintenance services for various needs.
             <ul>
-              <li>On-Grid Systems</li>
-              <li>Off-Grid Systems</li>
-              <li>Hybrid Systems</li>
-              <li>Residential Solar Solutions</li>
-              <li>Commercial & Industrial Solar</li>
-              <li>Solar Water Pump</li>
-              <li>Solar Street Lights</li>
-              <li>AMC & Maintenance</li>
+              <li>On-Grid Systems: Solutions for reducing electricity bills with net metering.</li>
+              <li>Off-Grid Systems: Independent power solutions with battery backup for uninterrupted supply.</li>
+              <li>Hybrid Systems: The best of both worlds – grid-tied with battery storage.</li>
+              <li>Residential Solar Solutions: Customized systems for homes.</li>
+              <li>Commercial & Industrial Solar: Large-scale solutions for businesses and factories.</li>
+              <li>Solar Water Pump: Eco-friendly and cost-effective solutions for agriculture.</li>
+              <li>Solar Street Lights: Sustainable lighting for public and private spaces.</li>
+              <li>AMC & Maintenance: Annual maintenance contracts to ensure peak performance.</li>
             </ul>
           </li>
-          <li><a href="#" onclick="showPage('products')">Products</a>
+          <li><a href="#" onclick="showPage('products')">Products</a>: Discover our selection of high-quality, certified solar products from leading global brands.
             <ul>
-              <li>Solar Panels</li>
-              <li>Solar Inverters</li>
-              <li>Lithium Batteries</li>
-              <li>Mounting Structure</li>
-              <li>Solar Water Pumps</li>
-              <li>Solar Cables & Accessories</li>
-              <li>Smart Monitoring Systems</li>
-              <li>Solar Packages (3kW, 5kW, 10kW)</li>
-              <li>Payment Options</li>
+              <li>Solar Panels: High-efficiency Mono PERC, Bifacial, Half-Cut panels.</li>
+              <li>Solar Inverters: Grid-tied, hybrid, and micro-inverters from top manufacturers.</li>
+              <li>Lithium Batteries: Advanced LiFePO4 batteries for reliable energy storage.</li>
+              <li>Mounting Structure: Durable and custom-designed mounting solutions.</li>
+              <li>Solar Water Pumps: Energy-efficient pumps for various applications.</li>
+              <li>Solar Cables & Accessories: All essential components for a complete system.</li>
+              <li>Smart Monitoring Systems: Real-time monitoring and management solutions.</li>
+              <li>Solar Packages (3kW, 5kW, 10kW): Pre-designed packages for various needs.</li>
+              <li>Payment Options: Flexible payment solutions including installments.</li>
             </ul>
           </li>
-          <li><a href="#" onclick="showPage('projects')">Projects</a>
+          <li><a href="#" onclick="showPage('projects')">Projects</a>: View our portfolio of successful solar installations across Multan and South Punjab.
             <ul>
-              <li>Residential Project Highlights</li>
-              <li>Commercial & Industrial Success Stories</li>
+              <li>Residential Project Highlights: Featured home solar installations.</li>
+              <li>Commercial & Industrial Success Stories: Case studies of business solar solutions.</li>
             </ul>
           </li>
-          <li><a href="#" onclick="showPage('calculator')">Solar Calculator</a></li>
-          <li><a href="#" onclick="showPage('gallery')">Gallery</a>
+          <li><a href="#" onclick="showPage('calculator')">Solar Calculator</a>: Estimate your potential savings and ideal system size with our easy-to-use tool.</li>
+          <li><a href="#" onclick="showPage('gallery')">Gallery</a>: A visual showcase of our real-world solar installations and satisfied customers.
             <ul>
-              <li>Residential Solar Gallery</li>
-              <li>Commercial Solar Gallery</li>
+              <li>Residential Solar Gallery: Images of solar on homes.</li>
+              <li>Commercial Solar Gallery: Photos of solar on businesses.</li>
             </ul>
           </li>
-          <li><a href="#" onclick="showPage('testimonials')">Testimonials</a></li>
-          <li><a href="#" onclick="showPage('contact')">Contact Us</a></li>
-          <li><a href="#" onclick="showPage('book-quote')">Get Free Quote / Build Your Package</a></li>
+          <li><a href="#" onclick="showPage('testimonials')">Testimonials</a>: Read reviews and hear feedback from our happy clients.</li>
+          <li><a href="#" onclick="showPage('contact')">Contact Us</a>: Find our contact information, office location, and send us a message.</li>
+          <li><a href="#" onclick="showPage('book-quote')">Get Free Quote / Build Your Package</a>: Request a personalized solar proposal and site survey.</li>
         </ul>
       </div>
       <div class="content-section">
         <h3>Additional Pages</h3>
         <ul>
-          <li><a href="#" onclick="showPage('faq')">Frequently Asked Questions (FAQ)</a></li>
-          <li><a href="#" onclick="showPage('blog')">Blog & News</a></li>
-          <li><a href="#" onclick="showPage('careers')">Careers</a></li>
-          <li><a href="#" onclick="showPage('privacy')">Privacy Policy</a></li>
-          <li><a href="#" onclick="showPage('terms')">Terms & Conditions</a></li>
-          <li><a href="#" onclick="showPage('sitemap')">🗺️ Sitemap</a></li>
+          <li><a href="#" onclick="showPage('faq')">Frequently Asked Questions (FAQ)</a>: Answers to common queries about solar energy and our services.</li>
+          <li><a href="#" onclick="showPage('blog')">Blog & News</a>: Stay updated with the latest news, articles, and tips on solar energy.</li>
+          <li><a href="#" onclick="showPage('careers')">Careers</a>: Explore job opportunities and join our growing team.</li>
+          <li><a href="#" onclick="showPage('privacy')">🔒 Privacy Policy</a>: Understand how we collect, use, and protect your personal data.</li>
+          <li><a href="#" onclick="showPage('terms')">📜 Terms & Conditions</a>: Read the legal terms governing our services and website usage.</li>
+          <li><a href="#" onclick="showPage('sitemap')">🗺️ Sitemap</a>: This page, providing a comprehensive map of our website.</li>
         </ul>
       </div>
+    </div>
+
+    <!-- Sitemap Page Video Section -->
+    <div class="content-section sr" style="background:var(--dark-bg3); border-radius:10px; padding:3rem 2rem; margin-top:5rem;">
+        <div class="video-section-header sr">
+            <span class="eyebrow">✦ Explore Our Site</span>
+            <h3>Navigating City of Saints <span>Solar</span></h3>
+            <p style="margin:0 auto 2rem;">A quick video guide on how to best explore our website and find the information you need.</p>
+        </div>
+        <div class="video-grid" style="grid-template-columns:1fr; max-width:700px;">
+          <div class="video-wrapper">
+            <iframe
+              src="https://player.vimeo.com/video/1169513528?autoplay=1&loop=0&title=0&byline=0&portrait=0&muted=1"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
     </div>
   </div>
 </section>
@@ -2473,7 +2883,7 @@ document.addEventListener('mousemove',e=>{
   cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
   setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';},80);
 });
-document.querySelectorAll('a,button,.svc-card,.prod-card,.proj-card,.tc,.pw,.gi,.hero-slide,.team-member,.brand-logo,.ci-card,.f-soc,.hamburger').forEach(el=>{
+document.querySelectorAll('a,button,.svc-card,.prod-card,.proj-card,.tc,.pw,.gi,.hero-slide,.team-member,.brand-logo,.ci-card,.f-soc,.hamburger, input[type="radio"]').forEach(el=>{
   el.addEventListener('mouseenter',()=>{ring.style.transform='translate(-50%,-50%) scale(1.8)';ring.style.borderColor='var(--page-accent)';ring.style.backgroundColor='rgba(0,230,118,0.2)';});
   el.addEventListener('mouseleave',()=>{ring.style.transform='translate(-50%,-50%) scale(1)';ring.style.borderColor='rgba(0,230,118,0.4)';ring.style.backgroundColor='rgba(0,230,118,0.1)';});
 });
@@ -2804,111 +3214,38 @@ function calcSavings(){
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.06});
 document.querySelectorAll('.sr').forEach(el=>obs.observe(el));
 
-
 // Simple Search Functionality (Frontend only)
 document.getElementById('n-search').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
-    const navLinks = document.querySelectorAll('.n-links a, .mobile-menu a');
-    const pageMap = {
-        'home': 'home', 'about': 'about', 'services': 'services', 'products': 'products',
-        'projects': 'projects', 'calculator': 'calculator', 'contact': 'contact',
-        'blog': 'blog', 'faq': 'faq', 'quote': 'book-quote', 'gallery': 'gallery',
-        'testimonials': 'testimonials', 'careers': 'careers', 'privacy': 'privacy',
-        'terms': 'terms', 'sitemap': 'sitemap'
-    };
-    
-    let matchedPageId = null;
-    let foundInCurrentPage = false;
-
     if (searchTerm.length > 2) {
-        // 1. Check for page matches
-        for (const [key, value] of Object.entries(pageMap)) {
-            if (key.includes(searchTerm) || value.includes(searchTerm)) {
-                matchedPageId = value;
-                break;
-            }
-        }
-        
-        // 2. If page matched, navigate
-        if (matchedPageId) {
-            e.target.style.borderColor = 'var(--accent-main)';
-            showPage(matchedPageId);
-            // Optionally, highlight text on the new page
-            setTimeout(() => highlightText(searchTerm, document.getElementById('page-' + matchedPageId)), 500);
-        } else {
-            // 3. If no page match, highlight on current page
-            e.target.style.borderColor = 'var(--accent-secondary)'; // Indicate searching general content
-            const currentPage = document.querySelector('.page.active');
-            foundInCurrentPage = highlightText(searchTerm, currentPage);
-            if (!foundInCurrentPage) {
-                 e.target.style.borderColor = 'var(--red-alert)'; // Indicate nothing found
-            }
-        }
-
-        // Highlight nav links
-        navLinks.forEach(link => {
+        let found = false;
+        document.querySelectorAll('.n-links a').forEach(link => {
             if (link.textContent.toLowerCase().includes(searchTerm)) {
-                link.style.color = 'var(--page-accent)';
+                link.style.color = 'var(--blue-accent)';
+                found = true;
             } else {
-                link.style.color = 'var(--gray)';
+                link.style.color = 'var(--text-secondary-dark)';
+            }
+        });
+        document.querySelectorAll('.sec-title, .sec-sub, .hero h1, .hero-p, .svc-name, .prod-name, .proj-name, .tm-name, .blog-post h4, .blog-post p, .content-section h3, .content-section p').forEach(textEl => {
+            if (textEl.textContent.toLowerCase().includes(searchTerm)) {
+                // For a true search, you'd navigate or filter here.
+                // For this example, we just log that it was found.
+                // console.log(`Found "${searchTerm}" in:`, textEl.textContent);
+                found = true;
             }
         });
 
+        if (found) {
+            e.target.style.borderColor = 'var(--green-wa)';
+        } else {
+            e.target.style.borderColor = 'var(--blue-accent)';
+        }
     } else {
-        e.target.style.borderColor = 'rgba(255,255,255,.15)';
-        navLinks.forEach(link => link.style.color = 'var(--gray)');
-        clearHighlights();
+        e.target.style.borderColor = 'rgba(0,0,0,.15)';
+        document.querySelectorAll('.n-links a').forEach(link => link.style.color = 'var(--text-secondary-dark)');
     }
 });
-
-function highlightText(term, container) {
-    clearHighlights(); // Clear previous highlights first
-
-    if (!container || !term) return false;
-
-    let found = false;
-    const regex = new RegExp(`(${term})`, 'gi');
-    const walk = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-
-    while ((node = walk.nextNode())) {
-        if (node.parentNode.tagName !== 'SCRIPT' && node.parentNode.tagName !== 'STYLE') {
-            const originalText = node.nodeValue;
-            if (regex.test(originalText)) {
-                const fragment = document.createDocumentFragment();
-                let lastIndex = 0;
-                originalText.replace(regex, (match, p1, offset) => {
-                    if (offset > lastIndex) {
-                        fragment.appendChild(document.createTextNode(originalText.substring(lastIndex, offset)));
-                    }
-                    const span = document.createElement('span');
-                    span.style.backgroundColor = 'rgba(0,176,255,0.4)'; // Highlight with secondary accent
-                    span.style.color = 'white';
-                    span.textContent = p1;
-                    span.classList.add('search-highlight');
-                    fragment.appendChild(span);
-                    lastIndex = offset + match.length;
-                    found = true;
-                    return match;
-                });
-                if (lastIndex < originalText.length) {
-                    fragment.appendChild(document.createTextNode(originalText.substring(lastIndex)));
-                }
-                node.parentNode.replaceChild(fragment, node);
-            }
-        }
-    }
-    return found;
-}
-
-function clearHighlights() {
-    document.querySelectorAll('.search-highlight').forEach(span => {
-        const parent = span.parentNode;
-        parent.replaceChild(document.createTextNode(span.textContent), span);
-        parent.normalize(); // Merge adjacent text nodes
-    });
-}
-
 
 // ── LIVE NOTIFICATIONS ──
 const reviews = [
@@ -2933,7 +3270,7 @@ function showNotif(){
   el.innerHTML=`
     <img class="notif-avatar" src="${r.avatar}" alt="${r.name}">
     <div class="notif-body">
-      <div class="notif-name">${r.name} <span style="font-weight:400;color:var(--gray);font-size:0.8rem">· ${r.loc}</span></div>
+      <div class="notif-name">${r.name} <span style="font-weight:400;color:var(--text-secondary-dark);font-size:0.8rem">· ${r.loc}</span></div>
       <div class="notif-msg">${r.msg}</div>
       <div class="notif-time">✅ Verified Customer · ${r.time}</div>
     </div>
@@ -2962,15 +3299,6 @@ setTimeout(()=>{
   showNotif();
   setInterval(showNotif,5000);
 },2000);
-
-
-// Initialize page theme
-document.addEventListener('DOMContentLoaded', () => {
-    const activePage = document.querySelector('.page.active');
-    if (activePage) {
-        document.body.setAttribute('data-page-theme', activePage.id.replace('page-', ''));
-    }
-});
 </script>
 </body>
 </html>
