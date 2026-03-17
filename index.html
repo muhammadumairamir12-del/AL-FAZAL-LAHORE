@@ -1563,7 +1563,7 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
 
 <!-- NAV -->
 <nav>
-  <div class="logo" onclick="go('home')">
+  <div class="logo" onclick="go('home')" data-p="home">
     <div class="logo-icon"><i class="fas fa-plus-square"></i></div> <!-- Changed to medical cross icon -->
     <div>
       <div class="logo-name">Al-Fazal Medical &amp; Dental</div>
@@ -1591,18 +1591,18 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
 <div class="mob-overlay" id="mobMenu">
   <div class="mob-close" onclick="closeMob()"><i class="fas fa-times"></i></div>
   <ul class="mob-nav-list">
-    <li><a onclick="go('home');closeMob()">Home</a></li>
-    <li><a onclick="go('about');closeMob()">About</a></li>
-    <li><a onclick="go('services');closeMob()">Dental Services</a></li>
-    <li><a onclick="go('medical-services');closeMob()">Medical Services</a></li>
-    <li><a onclick="go('doctors');closeMob()">Doctors</a></li>
-    <li><a onclick="go('treatments');closeMob()">Treatments</a></li>
-    <li><a onclick="go('patients');closeMob()">Patients</a></li>
-    <li><a onclick="go('reviews');closeMob()">Reviews</a></li>
-    <li><a onclick="go('gallery');closeMob()">Gallery</a></li>
-    <li><a onclick="go('awards');closeMob()">Awards</a></li>
-    <li><a onclick="go('contact');closeMob()">Contact</a></li>
-    <li><a onclick="go('book');closeMob()" class="mob-cta">📅 Book Now</a></li>
+    <li><a onclick="go('home');closeMob()" data-p="home">Home</a></li>
+    <li><a onclick="go('about');closeMob()" data-p="about">About</a></li>
+    <li><a onclick="go('services');closeMob()" data-p="services">Dental Services</a></li>
+    <li><a onclick="go('medical-services');closeMob()" data-p="medical-services">Medical Services</a></li>
+    <li><a onclick="go('doctors');closeMob()" data-p="doctors">Doctors</a></li>
+    <li><a onclick="go('treatments');closeMob()" data-p="treatments">Treatments</a></li>
+    <li><a onclick="go('patients');closeMob()" data-p="patients">Patients</a></li>
+    <li><a onclick="go('reviews');closeMob()" data-p="reviews">Reviews</a></li>
+    <li><a onclick="go('gallery');closeMob()" data-p="gallery">Gallery</a></li>
+    <li><a onclick="go('awards');closeMob()" data-p="awards">Awards</a></li>
+    <li><a onclick="go('contact');closeMob()" data-p="contact">Contact</a></li>
+    <li><a onclick="go('book');closeMob()" data-p="book" class="mob-cta">📅 Book Now</a></li>
   </ul>
 </div>
 
@@ -1618,7 +1618,7 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
   <section class="hero">
     <div class="hero-content">
       <div class="badge-top">Excellence in Healthcare Since 2005</div>
-      <h1>Two Specialties.<br><span>One Standard of Excellence.</span></h1>
+      <h1>All Specialties.<br><span>One Standard of Excellence.</span></h1>
       <p>Al-Fazal provides world-class Medical and Dental care under one roof in Johar Town, Lahore. Experience pain-free treatments, certified specialists, and state-of-the-art facilities tailored for your family's health.</p>
     </div>
   </section>
@@ -1655,10 +1655,10 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
 
   <!-- Stats Bar (Re-integrated from previous version) -->
   <div class="stats-bar"><div class="stats-grid">
-    <div><div class="snum">5000+</div><div class="slbl">Patients Treated</div></div>
-    <div><div class="snum">15+</div><div class="slbl">Years Excellence</div></div>
-    <div><div class="snum">10+</div><div class="slbl">Expert Doctors</div></div>
-    <div><div class="snum">100+</div><div class="slbl">Google Reviews</div></div>
+    <div><div class="snum">20000+</div><div class="slbl">Patients Treated</div></div>
+    <div><div class="snum">20+</div><div class="slbl">Years Excellence</div></div>
+    <div><div class="snum">15+</div><div class="slbl">Expert Doctors</div></div>
+    <div><div class="snum">500+</div><div class="slbl">Google Reviews</div></div>
   </div></div>
 
   <!-- New Custom Visionaries Section: Dedicated space for leadership messages with circular images -->
@@ -2514,7 +2514,7 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
       </div>
 
       <div class="award-card">
-        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Community Service Event">
+        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Community Service Event">
         <h3>Community Service Award</h3>
         <p>Acknowledged for our dedicated participation in local health camps and impactful dental awareness programs, serving the wider community.</p>
       </div>
@@ -2757,6 +2757,9 @@ footer{background:var(--dark-shade);padding:5rem 5% 2.8rem;color:rgba(255,255,25
 </div>
 
 <script>
+// Global variable to keep track of the current active page ID
+let currentPageId = 'home'; // Default to home
+
 // Helper function to send data to WhatsApp
 function sendToWhatsApp(data) {
     const whatsappNumber = '923214105096'; // Dr Yasir's WhatsApp number for bookings
@@ -2782,24 +2785,38 @@ function toggleWhy(card) {
   if (!isOpen) card.classList.add('open');
 }
 
-// ===== NAVIGATION =====
-function go(page) {
+// ===== NAVIGATION (modified for history API) =====
+function go(pageId, addToHistory = true) {
+  // Update current page ID
+  currentPageId = pageId;
+
   // Hide all pages
   document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active');
     p.style.display = 'none';
   });
+
   // Show target page
-  const el = document.getElementById('pg-' + page);
+  const el = document.getElementById('pg-' + pageId);
   if (el) {
     el.style.display = 'block';
     el.classList.add('active');
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); // Scroll to top for new page
+  } else {
+    // Fallback if pageId is invalid, go to home
+    console.warn(`Page 'pg-${pageId}' not found, redirecting to home.`);
+    go('home', false); // Don't add to history again, replace current state with home
+    return;
   }
+
   // Update active nav link
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.classList.toggle('active-nav', a.getAttribute('data-p') === page);
+  document.querySelectorAll('.nav-links a, .mob-nav-list a, .logo').forEach(a => {
+    a.classList.remove('active-nav'); // Remove from all first
+    if (a.getAttribute('data-p') === pageId) {
+      a.classList.add('active-nav');
+    }
   });
+
   // Ensure mobile menu is closed when navigating
   closeMob();
   
@@ -2807,14 +2824,17 @@ function go(page) {
   document.querySelectorAll('.video-iframe').forEach(iframe => {
       iframe.src = ''; // Stop video playback
       // Find the parent .video-wrapper for the iframe to show its placeholder
-      const parentWrapper = iframe.closest('.video-wrapper'); 
+      const parentWrapper = iframe.closest('.video-wrapper, .video-card'); 
       if (parentWrapper) {
           parentWrapper.querySelector('.video-placeholder').style.display = 'flex'; // Show placeholder
           iframe.style.display = 'none'; // Hide iframe
       }
   });
 
-  return false; // prevent any default behavior
+  // Update browser history (pushState)
+  if (addToHistory) {
+    history.pushState({ page: pageId }, '', '#' + pageId);
+  }
 }
 
 // ===== SERVICE DETAIL (Dental) =====
@@ -2977,9 +2997,6 @@ function handleBookingPageSubmit(event) {
 }
 
 
-// ===== HERO IMAGE CAROUSEL (Removed from HTML, this JS is no longer active) =====
-// No carousel logic needed for the current static hero background.
-
 // ===== INLINE VIDEO PLAYBACK (FOR CLINIC TOUR) =====
 function playTourVideo() {
     const videoWrapper = document.querySelector('.tour-sec .video-wrapper');
@@ -3042,17 +3059,80 @@ function playVideo(cardElement, vimeoVideoId) {
     }
 }
 
-// ===== SPLASH SCREEN LOGIC =====
-// The splash screen text animations are handled by CSS.
-// The home page is set to 'active' in HTML by default, and the splash screen hides itself with a timeout.
-setTimeout(function(){
-  var splash = document.getElementById('splash');
-  if(splash){ splash.style.opacity='0'; splash.style.transition='opacity 1.2s ease-out, visibility 1.2s ease-out'; } // Ensure proper transition
-  setTimeout(function(){
-    if(splash) splash.style.display='none';
-    // No explicit 'go('home')' needed here as 'pg-home' is active by default.
-  }, 1200); // This timeout should match the CSS transition duration
-}, 4000); // Splash screen visible for 4 seconds before starting fade out
+// ===== SPLASH SCREEN LOGIC & HISTORY INITIALIZATION =====
+// Function to handle initial page load after splash screen
+function initializePageAndHistory() {
+  const splash = document.getElementById('splash');
+  if (splash) {
+    // Start fading out the splash screen
+    splash.style.opacity = '0';
+    splash.style.visibility = 'hidden'; // Make it invisible
+    // Set a transition duration that matches or is slightly shorter than CSS to ensure smooth fade out
+    splash.style.transition = 'opacity 1.2s ease-out, visibility 1.2s ease-out';
+    setTimeout(() => {
+      splash.style.display = 'none'; // Completely hide after transition
+      // Now handle initial page and history
+      let initialPage = window.location.hash.substring(1); // Get page from hash
+      if (!initialPage || !document.getElementById('pg-' + initialPage)) {
+        initialPage = 'home'; // Default to home if no hash or invalid hash
+      }
+      go(initialPage, false); // Load page without pushing a new state
+      history.replaceState({ page: initialPage }, '', '#' + initialPage); // Replace initial browser entry
+    }, 1200); // This timeout should match the CSS transition duration for splash.hide
+  } else {
+    // Fallback if splash is somehow removed or not found
+    let initialPage = window.location.hash.substring(1);
+    if (!initialPage || !document.getElementById('pg-' + initialPage)) {
+      initialPage = 'home';
+    }
+    go(initialPage, false);
+    history.replaceState({ page: initialPage }, '', '#' + initialPage);
+  }
+}
+
+// Trigger initial page load logic after splash timeout (4 seconds total duration before fade out starts)
+document.addEventListener('DOMContentLoaded', () => {
+    const splash = document.getElementById('splash');
+    if (splash) {
+        // This setTimeout ensures the splash animation plays for 4 seconds,
+        // then initializePageAndHistory will handle the fade-out and actual page load.
+        setTimeout(initializePageAndHistory, 4000); 
+    } else {
+        // If no splash screen, initialize immediately
+        initializePageAndHistory();
+    }
+});
+
+
+// Popstate event listener for browser back/forward buttons
+window.addEventListener('popstate', function(event) {
+    const targetPageId = event.state ? event.state.page : 'home'; // If state is null, assume going back to initial root
+
+    // If we are currently on the homepage and trying to navigate back *out* of the site's history
+    // This condition checks if we are on 'home' and the browser's history is attempting to go to a state
+    // that is either explicitly 'home' (which would imply going beyond the initial replaced 'home' state)
+    // or if the state is null (meaning going back to the browser's default entry before our site's history started).
+    if (currentPageId === 'home' && (!event.state || event.state.page === 'home')) {
+        // A slight delay gives the browser time to register the popstate event
+        setTimeout(() => {
+            if (confirm("Do you want to exit the website?")) {
+                // User confirmed exit, allow the browser to continue navigating out.
+                // No explicit JavaScript action needed here, the browser will handle the 'back' operation.
+            } else {
+                // User cancelled exit, so we push the 'home' state back into the history stack.
+                // This effectively cancels the browser's 'back' navigation and keeps the user on the homepage.
+                history.pushState({ page: 'home' }, '', '#home');
+                // Since popstate already visually updated the page (if it was different from home),
+                // we ensure the history is corrected to show 'home' as the current state,
+                // and the user remains on the 'home' page. No need to call go('home', false) again.
+            }
+        }, 50); // Short delay for better interaction with browser's history management
+    } else {
+        // Normal internal navigation, or navigating to 'home' from another internal page
+        go(targetPageId, false); // Load the page without pushing a new history state
+    }
+});
+
 
 // ===== PRIVACY MODAL LOGIC =====
 function acceptPriv() { localStorage.setItem('alfazal_priv','1'); closePriv(); }
