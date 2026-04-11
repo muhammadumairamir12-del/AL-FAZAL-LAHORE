@@ -55,7 +55,7 @@ input,select,textarea{font-family:var(--font);}
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 10px; 
+  border-radius: 10px;
 }
 
 .login-logo-name{font-family:var(--serif);font-size:1.7rem;font-weight:900;color:#fff;line-height:1;}
@@ -671,7 +671,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
           <div class="table-wrap">
             <table>
               <thead><tr><th>Service</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
-              <tbody id="services-tbody"><tr><td colspan="4" class="empty-row"><i class="fas fa-spinner fa-spin"></i>Loading...</td></tr></tbody>
+              <tbody id="services-tbody"><tr><td colspan="4" class="empty-row"><i class="fas fa-tooth"></i>No custom services. Add new ones above.</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -718,7 +718,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
               </div>
 
               <!-- Existing static info below (can be made editable if needed) -->
-              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Admin Email</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">infoskyeagle12@gmail.com</div></div>
+              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Admin Email</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">dryasirkhawaja@gmail.com </div></div>
               <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Website</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">Al-Fazal Medical &amp; Dental</div></div>
               <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Developer</div><div style="font-weight:700;font-size:.88rem;color:var(--rose)">SkyEagle Digital Agency 🚀</div></div>
               <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:9px;padding:13px;display:flex;align-items:center;gap:8px">
@@ -868,7 +868,14 @@ const firestoreDb = getFirestore(app); // Firestore Database
 const messaging = getMessaging(app); // Firebase Cloud Messaging
 const storage = getStorage(app); // NEW: Initialize Firebase Storage
 
-const ADMIN_EMAIL = "infoskyeagle12@gmail.com"; // This is the ONLY email that can log in.
+// =======================================================================
+// IMPORTANT: Only these emails will be allowed to log into the admin panel.
+const ADMIN_EMAILS = [
+  "infoskyeagle12@gmail.com",
+  "dryasirkhawaja@gmail.com"
+];
+// =======================================================================
+
 const NOTIFICATION_ICON_URL = "https://scontent.flhe2-4.fna.fbcdn.net/v/t39.30808-6/668669594_122116458531233257_3345747139197208070_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeF-LTIJU9ySRcVa4sV0zysv_dH8l3Arfcz90fyXcCt9zMU9bORgm3rjWOKvTklnBE04bbhuk5nK0_3egvxhdRqT&_nc_ohc=U5WNLwU6hd8Q7kNvwHghVlF&_nc_oc=AdqOJ-Ac1llHmmPRDxgBVF7J7gLG9P4mJhMZUh2J5-_-KlcgAxV4XexlaGhA6UkanPw&_nc_zt=23&_nc_ht=scontent.flhe2-4.fna&_nc_gid=BL8LM-J3NYqKGiMOIqduPw&_nc_ss=7a3a8&oh=00_Af1nBC-TKukubOfGDW25DChFv9kr8WWaS3swFjQhYzAlaA&oe=69DD3C45";
 const VAPID_KEY = "BDCIX9UAIBDhv5LAGIaPMzgonv5eLr55dQdeEMlkO8Qqcgg_m2cvwn43L0cidvWoL28Ovhi7iUA9fqxpbdgRCbs"; // <<< IMPORTANT: REPLACE WITH YOUR ACTUAL VAPID KEY
 // 🚨🚨🚨 SECURITY WARNING 🚨🚨🚨
@@ -1058,15 +1065,15 @@ window.doLogin = async () => {
   btn.textContent = 'Logging in...'; btn.disabled = true;
   try {
     const cred = await signInWithEmailAndPassword(auth, email, pass);
-    if (cred.user.email !== ADMIN_EMAIL) { 
-        await signOut(auth); // Ensure user is signed out if not the admin email
-        errEl.textContent = '❌ Access denied — admin only'; 
-        btn.textContent = 'Login to Admin Panel'; 
-        btn.disabled = false; 
-        return; 
+    // After successful Firebase authentication, explicitly check if the email is an authorized admin.
+    if (!ADMIN_EMAILS.includes(cred.user.email)) {
+        await signOut(auth); // Sign out unauthorized user immediately
+        errEl.textContent = '❌ Access denied — this email is not authorized.';
+        btn.textContent = 'Login to Admin Panel';
+        btn.disabled = false;
+        return;
     }
-    // Success handled by onAuthStateChanged
-    // onAuthStateChanged will call initNotification for admin
+    // If authorized, onAuthStateChanged will handle displaying the admin app.
   } catch(e) {
     errEl.textContent = '❌ Invalid credentials'; btn.textContent = 'Login to Admin Panel'; btn.disabled = false;
   }
@@ -1075,7 +1082,7 @@ window.doLogin = async () => {
 window.doLogout = async () => { await signOut(auth); };
 
 onAuthStateChanged(auth, user => {
-  if (user && user.email === ADMIN_EMAIL) {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
     // Show admin
     document.getElementById('login-screen').classList.add('out');
     document.getElementById('admin-app').classList.add('active');
@@ -1088,8 +1095,19 @@ onAuthStateChanged(auth, user => {
     initAllData();
     initNotification(user.uid); // Request FCM token for admin
   } else {
+    // If a user is logged in but their email is NOT in the ADMIN_EMAILS list,
+    // or if no user is logged in, show the login screen.
+    if (user) {
+        console.warn("Unauthorized access attempt. Logging out:", user.email);
+        signOut(auth); // Ensure unauthorized user is logged out
+    }
     document.getElementById('login-screen').classList.remove('out');
     document.getElementById('admin-app').classList.remove('active');
+    // Ensure the login screen is visible and interactive
+    document.getElementById('login-screen').style.opacity = '1';
+    document.getElementById('login-screen').style.transform = 'scale(1)';
+    document.getElementById('login-screen').style.pointerEvents = 'auto';
+    document.getElementById('login-screen').style.visibility = 'visible';
   }
 });
 
@@ -1204,7 +1222,7 @@ function loadBookings() {
     bookingsData = s.exists() ? s.val() : {};
     const prev = prevBookingCount;
     const curr = Object.keys(bookingsData).length;
-    
+
     // Moved new booking notification logic to loadDashboard where it's immediately visible
     // if (curr > prev && prev > 0) {
     //   playSound('booking');
@@ -1287,47 +1305,117 @@ window.approveReview = async(id)=>{await update(ref(db,`reviews/${id}`),{approve
 window.deleteReview  = async(id)=>{if(!confirm('Delete?'))return;await remove(ref(db,`reviews/${id}`));toast('🗑 Review deleted');};
 
 // ── CONSULTATIONS / CHAT ──
-function loadChats() {
-  onValue(ref(db,'users'), s => {
-    const el = document.getElementById('chat-patient-list');
-    if (!s.exists()) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:.84rem">No patients yet</div>'; return; }
-    const patients = Object.entries(s.val()).map(([id,u])=>({id,...u})).filter(u=>u.role==='patient');
-    if (!patients.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:.84rem">No patients yet</div>'; return; }
-    
-    const colors = ['#e8315a','#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4'];
-    el.innerHTML = patients.map((p,i)=>`
-      <div class="chat-item ${currentChatUID===p.id?'active':''}" onclick="selectChat('${p.id}','${esc(p.name||p.email||'Patient')}','${colors[i%colors.length]}')" id="ci-${p.id}">
-        <div class="chat-av" style="background:${colors[i%colors.length]};width:42px;height:42px;font-size:.88rem">${(p.name||p.email||'P')[0].toUpperCase()}</div>
-        <div style="flex:1;overflow:hidden">
-          <div class="chat-item-nm">${esc(p.name||p.email||'Patient')}</div>
-          <div class="chat-item-last">${esc(p.phone||p.email||'—')}</div>
-        </div>
-      </div>`).join('');
+window.unreadCounts = window.unreadCounts || {};
+window.chatListenersAdded = window.chatListenersAdded || {};
 
-    // Listen for new messages from each patient
-    patients.forEach(p => {
-      onValue(ref(db,`chats/${p.id}`), snap => {
-        if (!snap.exists()) return;
-        const msgs = Object.values(snap.val());
-        const userMsgs = msgs.filter(m=>m.sender==='user');
-        const prevCnt = prevChatCount[p.id] || 0;
-        if (userMsgs.length > prevCnt && prevCnt > 0) {
-          playSound('consult');
-          showNotif('consult',`💬 New message from ${p.name||'Patient'}`,userMsgs[userMsgs.length-1].text?.substring(0,60)||'');
-          const badge = document.createElement('span');
-          // Show unread badge
-          const ci = document.getElementById(`ci-${p.id}`);
-          if (ci) {
-            const existing = ci.querySelector('.chat-unread');
-            if (existing) existing.textContent = parseInt(existing.textContent||0)+1;
-            else { const b = document.createElement('span'); b.className='chat-unread'; b.textContent='1'; ci.appendChild(b); }
-          }
-          const consult = document.getElementById('badge-consult');
-          if (consult) { consult.style.display='inline'; consult.textContent=parseInt(consult.textContent||0)+1; }
+// Sidebar wale total badge ko update karne ka function
+function updateTotalConsultBadge() {
+  let total = 0;
+  for (const uid in window.unreadCounts) {
+    total += window.unreadCounts[uid];
+  }
+  const consultBadge = document.getElementById('badge-consult');
+  if (consultBadge) {
+    if (total > 0) {
+      consultBadge.style.display = 'inline';
+      consultBadge.textContent = total;
+    } else {
+      consultBadge.style.display = 'none';
+      consultBadge.textContent = 0;
+    }
+  }
+}
+
+function loadChats() {
+  // Direct 'chats' database se messages uthayen
+  onValue(ref(db, 'chats'), chatSnap => {
+    const el = document.getElementById('chat-patient-list');
+    if (!chatSnap.exists()) { 
+      el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:.84rem">No messages yet</div>'; 
+      return; 
+    }
+
+    const chatUids = Object.keys(chatSnap.val());
+    
+    // Database se user details nikalen taake Name, Email show ho sake
+    get(ref(db, 'users')).then(userSnap => {
+      const allUsers = userSnap.exists() ? userSnap.val() : {};
+      const colors = ['#e8315a','#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4'];
+
+      const scrollTop = el.scrollTop; 
+      let html = '';
+
+      chatUids.forEach((uid, i) => {
+        const u = allUsers[uid] || {};
+        
+        // Asal details (Name, Email, Phone) set karna
+        const name = u.name || 'Patient';
+        const email = u.email || 'No Email';
+        const phone = u.phone ? ` · ${u.phone}` : '';
+        const subText = `${email}${phone}`;
+        
+        const color = colors[i % colors.length];
+        const isActive = (currentChatUID === uid) ? 'active' : '';
+        const unread = window.unreadCounts[uid] || 0;
+        
+        // Agar pehle se read nahi kiya tou Badge lagana
+        const badgeHtml = (unread > 0 && currentChatUID !== uid) ? `<span class="chat-unread">${unread}</span>` : '';
+
+        html += `
+          <div class="chat-item ${isActive}" onclick="selectChat('${uid}','${esc(name)}','${color}')" id="ci-${uid}">
+            <div class="chat-av" style="background:${color};width:42px;height:42px;font-size:.88rem">${name.charAt(0).toUpperCase()}</div>
+            <div style="flex:1;overflow:hidden">
+              <div class="chat-item-nm">${esc(name)}</div>
+              <div class="chat-item-last" style="font-size:.7rem;color:var(--text3);">${esc(subText)}</div>
+            </div>
+            ${badgeHtml}
+          </div>`;
+      });
+
+      el.innerHTML = html;
+      el.scrollTop = scrollTop;
+
+      // Naye Messages ka system (Har waqt check karna)
+      chatUids.forEach(uid => {
+        if (!window.chatListenersAdded[uid]) {
+          window.chatListenersAdded[uid] = true;
+          
+          onValue(ref(db, `chats/${uid}`), snap => {
+            if (!snap.exists()) return;
+            const msgs = Object.values(snap.val());
+            const userMsgs = msgs.filter(m => m.sender === 'user');
+            const prevCnt = prevChatCount[uid] || 0;
+            
+            if (userMsgs.length > prevCnt && prevCnt > 0) {
+              // Agar ye chat open nahi hui tou hi notify karo aur badge badao
+              if (currentChatUID !== uid) {
+                const uName = (allUsers[uid] && allUsers[uid].name) ? allUsers[uid].name : 'Patient';
+                playSound('consult');
+                showNotif('consult', `💬 New message from ${uName}`, userMsgs[userMsgs.length-1].text?.substring(0,60)||'');
+                
+                window.unreadCounts[uid] = (window.unreadCounts[uid] || 0) + 1;
+                
+                const ci = document.getElementById(`ci-${uid}`);
+                if (ci) {
+                  let badge = ci.querySelector('.chat-unread');
+                  if (badge) {
+                    badge.textContent = window.unreadCounts[uid];
+                  } else {
+                    badge = document.createElement('span');
+                    badge.className = 'chat-unread';
+                    badge.textContent = window.unreadCounts[uid];
+                    ci.appendChild(badge);
+                  }
+                }
+                updateTotalConsultBadge();
+              }
+            }
+            prevChatCount[uid] = userMsgs.length;
+            
+            // Screen auto-update
+            if (currentChatUID === uid) renderChatMessages(snap);
+          });
         }
-        prevChatCount[p.id] = userMsgs.length;
-        // If this chat is open, refresh messages
-        if (currentChatUID === p.id) renderChatMessages(snap);
       });
     });
   });
@@ -1336,14 +1424,24 @@ function loadChats() {
 window.selectChat = (uid, name, color) => {
   currentChatUID = uid;
   document.getElementById('cw-name').textContent = name;
-  document.getElementById('cw-av').textContent = name[0].toUpperCase();
+  document.getElementById('cw-av').textContent = name.charAt(0).toUpperCase();
   document.getElementById('cw-av').style.background = color;
-  // Clear unread badge
+  
+  // UI Se Badge Hatana
+  document.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
   const ci = document.getElementById(`ci-${uid}`);
-  if (ci) { const b=ci.querySelector('.chat-unread'); if(b) b.remove(); ci.classList.add('active'); }
-  document.querySelectorAll('.chat-item').forEach(c => { if (!c.id || c.id !== `ci-${uid}`) c.classList.remove('active'); });
-  // Load messages
-  onValue(ref(db,`chats/${uid}`), snap => renderChatMessages(snap));
+  if (ci) { 
+    ci.classList.add('active'); 
+    const badge = ci.querySelector('.chat-unread'); 
+    if (badge) badge.remove(); 
+  }
+  
+  // System se total badges clean karna
+  window.unreadCounts[uid] = 0;
+  updateTotalConsultBadge();
+
+  // Chats Data load karna
+  onValue(ref(db, `chats/${uid}`), snap => renderChatMessages(snap));
 };
 
 function renderChatMessages(snap) {
@@ -1367,7 +1465,7 @@ window.sendAdminMsg = async () => {
   await push(ref(db,`chats/${currentChatUID}`), {
     sender:'admin', text: messageText, timestamp:Date.now()
   });
-  // Send push notification to the patient
+  // Push Notification bhejna
   sendNotificationToUserFromAdmin(currentChatUID, "Admin replied to your consultation", messageText, "/consultation");
   input.value = '';
 };
@@ -1806,7 +1904,7 @@ document.addEventListener('click', e => {
 
 // ENTER KEY FOR CHAT
 document.getElementById('l-pass')?.addEventListener('keypress', e => { if(e.key==='Enter') window.doLogin?.(); });
-document.getElementById('cw-input')?.addEventListener('keypress', e => { if(e.key==='Enter') window.sendAdminMsg?.(); });
+document.getElementById('cw-input')?.addEventListener('keypress', e => { if(e.key=='Enter') window.sendAdminMsg?.(); });
 
 // New: Prompt for broadcast message
 window.promptAndSendBroadcast = function() {
