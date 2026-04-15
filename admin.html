@@ -897,6 +897,10 @@ const ADMIN_EMAILS = [
 ];
 // =======================================================================
 
+// WhatsApp Target Number for sending booking details
+const WHATSAPP_TARGET_NUMBER = '923214105096'; 
+
+
 // const VAPID_KEY = "BDCIX9UAIBDhv5LAGIaPMzgonv5eLr55dQdeEMlkO8Qqcgg_m2cvwn43L0cidvWoL28Ovhi7iUA9fqxpbdgRCbs"; // VAPID key commented out
 
 let currentChatUID = null;
@@ -1136,9 +1140,12 @@ function renderBookings(list) {
     <td><span class="badge b-draft">${esc(b.source||'Website')}</span></td>
     <td><span class="badge b-${b.status||'pending'}">${b.status||'pending'}</span></td>
     <td style="display:flex;gap:5px;flex-wrap:wrap">
-      ${b.status!=='confirmed'?`<button class="btn btn-green btn-xs" onclick="confirmBooking('${b.id}')"><i class="fas fa-check"></i></button>`:''}
-      ${b.status!=='cancelled'?`<button class="btn btn-ghost btn-xs" onclick="cancelBooking('${b.id}')"><i class="fas fa-ban"></i></button>`:''}
-      <button class="btn btn-red btn-xs" onclick="deleteBooking('${b.id}')"><i class="fas fa-trash"></i></button>
+      ${b.status!=='confirmed'?`<button class="btn btn-green btn-xs" onclick="confirmBooking('${b.id}')" title="Confirm Booking"><i class="fas fa-check"></i></button>`:''}
+      ${b.status!=='cancelled'?`<button class="btn btn-ghost btn-xs" onclick="cancelBooking('${b.id}')" title="Cancel Booking"><i class="fas fa-ban"></i></button>`:''}
+      <button class="btn btn-red btn-xs" onclick="deleteBooking('${b.id}')" title="Delete Booking"><i class="fas fa-trash"></i></button>
+      <button class="btn btn-xs" style="background:#25D366;color:#fff;" onclick="sendBookingViaWhatsApp('${b.id}')" title="Send details via WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+      </button>
     </td>
   </tr>`).join('');
 }
@@ -1165,6 +1172,35 @@ window.cancelBooking  = async(id)=>{
 };
 window.deleteBooking  = async(id)=>{if(!confirm('Delete this booking?'))return;await remove(ref(db,`bookings/${id}`));toast('🗑 Deleted');};
 
+// Function to send booking details via WhatsApp
+window.sendBookingViaWhatsApp = (bookingId) => {
+    const booking = bookingsData[bookingId];
+    if (!booking) {
+        toast('Booking details not found!', true);
+        return;
+    }
+
+    // Construct the raw message string with newlines
+    const rawMessage = `*New Booking Details - Al-Fazal Hospital*\n\n` +
+                       `*Patient Name:* ${booking.name || 'N/A'}\n` +
+                       `*Patient Phone:* ${booking.phone || 'N/A'}\n` +
+                       `*Service:* ${booking.service || 'N/A'}\n` +
+                       `*Doctor:* ${booking.doctor || 'Any'}\n` +
+                       `*Date:* ${booking.date || 'N/A'}\n` +
+                       `*Time:* ${booking.time || 'N/A'}\n` +
+                       `*Status:* ${booking.status || 'N/A'}\n` +
+                       `*Source:* ${booking.source || 'Website'}\n\n` +
+                       `_Booking ID: ${bookingId}_`;
+
+    // URL-encode the entire message
+    const encodedMessage = encodeURIComponent(rawMessage);
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_TARGET_NUMBER}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+    toast('Opening WhatsApp with booking details...');
+};
+
+
 // ── REVIEWS ──
 function loadReviews() {
   onValue(ref(db,'reviews'), s => {
@@ -1187,14 +1223,13 @@ function loadReviews() {
 window.approveReview = async(id)=>{await update(ref(db,`reviews/${id}`),{approved:true});toast('✅ Review published!');};
 window.deleteReview  = async(id)=>{if(!confirm('Delete?'))return;await remove(ref(db,`reviews/${id}`));toast('🗑 Review deleted');};
 
+
 // ── CONSULTATIONS / CHAT ──
 window.unreadCounts = window.unreadCounts || {};
 window.chatListenersAdded = window.chatListenersAdded || {};
-window.presenceListeners = window.presenceListeners || {};
-window.lastMessageTimestamps = {}; 
-window.prevMsgCounts = {}; // پچھلے میسجز کی تعداد یاد رکھنے کے لیے
+window.prevMsgCounts = {}; 
+window.lastMessageTimestamps = {};
 
-// Local Storage Helpers
 window.getSeenCounts = () => JSON.parse(localStorage.getItem('admin_seen_chats') || '{}');
 window.saveSeenCount = (uid, count) => {
   let seen = window.getSeenCounts();
@@ -1204,62 +1239,40 @@ window.saveSeenCount = (uid, count) => {
 
 function updateTotalConsultBadge() {
   let total = 0;
-  for (const uid in window.unreadCounts) {
-    total += window.unreadCounts[uid];
-  }
-  const consultBadge = document.getElementById('badge-consult');
-  if (consultBadge) {
-    if (total > 0) {
-      consultBadge.style.display = 'inline';
-      consultBadge.textContent = total;
-    } else {
-      consultBadge.style.display = 'none';
-      consultBadge.textContent = 0;
-    }
-  }
+  for (const uid in window.unreadCounts) { total += window.unreadCounts[uid]; }
+  const b = document.getElementById('badge-consult');
+  if (b) { b.style.display = total > 0 ? 'inline' : 'none'; b.textContent = total; }
 }
 
 function loadChats() {
   onValue(ref(db, 'chats'), chatSnap => {
     const el = document.getElementById('chat-patient-list');
-    if (!chatSnap.exists()) {
-      el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:.84rem">No messages yet</div>';
-      return;
-    }
+    if (!chatSnap.exists()) { el.innerHTML = 'No messages'; return; }
 
     const chatsData = chatSnap.val();
     const chatUids = Object.keys(chatsData);
 
-    // Beep Logic: نئے میسج کی پہچان
+    // Beep & Timestamp Logic
     chatUids.forEach(uid => {
       const msgs = Object.values(chatsData[uid]);
       const currentCount = msgs.length;
       const prevCount = window.prevMsgCounts[uid] || 0;
 
-      // اگر میسجز بڑھے ہیں اور آخری میسج یوزر کا ہے
       if (currentCount > prevCount) {
-        const lastMsg = msgs[currentCount - 1];
-        if (lastMsg.sender === 'user' && prevCount !== 0) {
-           // اگر یہ میسج موجودہ کھلی ہوئی چیٹ کا نہیں ہے تو بیپ بجاؤ
-           if (currentChatUID !== uid) {
-             playSound('consult'); // بیپ بجے گی
-           }
+        if (msgs[currentCount-1].sender === 'user' && prevCount !== 0 && currentChatUID !== uid) {
+          playSound('consult'); // نئے میسج پر بیپ
         }
         window.prevMsgCounts[uid] = currentCount;
       }
-      
-      if (currentCount > 0) {
-        window.lastMessageTimestamps[uid] = msgs[currentCount - 1].timestamp;
-      }
+      window.lastMessageTimestamps[uid] = msgs[currentCount-1].timestamp;
     });
 
-    // ترتیب (Sorting): نیا میسج سب سے اوپر
-    chatUids.sort((a, b) => (window.lastMessageTimestamps[b] || 0) - (window.lastMessageTimestamps[a] || 0));
+    // Sorting: نیا میسج سب سے اوپر
+    chatUids.sort((a,b) => (window.lastMessageTimestamps[b]||0) - (window.lastMessageTimestamps[a]||0));
 
     get(ref(db, 'users')).then(userSnap => {
       const allUsers = userSnap.exists() ? userSnap.val() : {};
       const colors = ['#e8315a','#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4'];
-      const scrollTop = el.scrollTop;
       let html = '';
 
       chatUids.forEach((uid, i) => {
@@ -1270,20 +1283,19 @@ function loadChats() {
         
         const msgs = Object.values(chatsData[uid]);
         const userMsgs = msgs.filter(m => m.sender === 'user');
-        const seenCounts = window.getSeenCounts();
-        const unread = Math.max(0, userMsgs.length - (seenCounts[uid] || 0));
+        const unread = Math.max(0, userMsgs.length - (window.getSeenCounts()[uid] || 0));
         window.unreadCounts[uid] = unread;
 
         const isUnread = unread > 0 && currentChatUID !== uid;
-        const nameStyle = isUnread ? 'color:var(--rose); font-weight:800;' : 'color:var(--text); font-weight:700;';
         const itemBg = isUnread ? 'background: rgba(232, 49, 90, 0.08);' : '';
+        const nameStyle = isUnread ? 'color:var(--rose); font-weight:800;' : 'color:var(--text); font-weight:700;';
 
         html += `
           <div class="chat-item ${isActive}" onclick="selectChat('${uid}','${esc(name)}','${color}')" id="ci-${uid}" style="${itemBg}">
             <div id="av-wrap-${uid}" style="position:relative;width:42px;height:42px;flex-shrink:0">
               <div class="chat-av" style="background:${color};width:42px;height:42px;font-size:.88rem">${name.charAt(0).toUpperCase()}</div>
               <span id="presence-dot-${uid}" style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#6b7280;border:2px solid #fff;display:inline-block;z-index:5;"></span>
-              ${isUnread ? `<span class="chat-unread-dp" style="position:absolute; top:-6px; right:-6px; background:var(--rose); color:#fff; font-size:0.65rem; font-weight:900; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:50px; border:2px solid #fff; z-index:10;">${unread > 99 ? '99+' : unread}</span>` : ''}
+              ${isUnread ? `<span class="chat-unread-dp" style="position:absolute; top:-6px; right:-6px; background:var(--rose); color:#fff; font-size:0.65rem; font-weight:900; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:50px; border:2px solid #fff; z-index:10;">${unread}</span>` : ''}
             </div>
             <div style="flex:1;overflow:hidden;margin-left:10px;">
               <div class="chat-item-nm" id="nm-${uid}" style="${nameStyle}">${esc(name)}</div>
@@ -1294,14 +1306,9 @@ function loadChats() {
             ${isUnread ? `<div class="chat-unread" style="background:var(--rose); color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem;">${unread}</div>` : ''}
           </div>`;
       });
-
       el.innerHTML = html;
-      el.scrollTop = scrollTop;
       updateTotalConsultBadge();
-      
-      if (currentChatUID && chatsData[currentChatUID]) {
-        renderChatMessages(chatsData[currentChatUID]);
-      }
+      if (currentChatUID) renderChatMessages(chatsData[currentChatUID]);
     });
   });
 }
@@ -1313,23 +1320,18 @@ window.selectChat = (uid, name, color) => {
   document.getElementById('cw-av').textContent = name.charAt(0).toUpperCase();
   document.getElementById('cw-av').style.background = color;
 
+  // Clear UI Alerts
   const ci = document.getElementById(`ci-${uid}`);
   if (ci) {
-    ci.style.background = '';
-    ci.classList.add('active');
+    ci.style.background = ''; ci.classList.add('active');
     const nameEl = document.getElementById(`nm-${uid}`);
     if (nameEl) { nameEl.style.color = 'var(--text)'; nameEl.style.fontWeight = '700'; }
-    const badge = ci.querySelector('.chat-unread');
-    if (badge) badge.remove();
-    const dpBadge = ci.querySelector('.chat-unread-dp');
-    if (dpBadge) dpBadge.remove();
   }
 
   // Mark as Read
   get(ref(db, `chats/${uid}`)).then(snap => {
     if (snap.exists()) {
-      const msgs = Object.values(snap.val());
-      const userMsgs = msgs.filter(m => m.sender === 'user');
+      const userMsgs = Object.values(snap.val()).filter(m => m.sender === 'user');
       window.saveSeenCount(uid, userMsgs.length);
       window.unreadCounts[uid] = 0;
       updateTotalConsultBadge();
@@ -1340,26 +1342,20 @@ window.selectChat = (uid, name, color) => {
 
 function renderChatMessages(chatData) {
   const el = document.getElementById('cw-messages');
-  if (!chatData) { el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:.84rem;padding:20px">No messages yet</div>'; return; }
-  
   const messages = Object.values(chatData);
-  el.innerHTML = '';
-  messages.forEach(d => {
-    const div = document.createElement('div');
-    div.className = `msg-bubble msg-${d.sender==='user'?'user':'admin'}`;
-    div.innerHTML = `${esc(d.text)}<div class="msg-time">${fmtTime(d.timestamp)}</div>`;
-    el.appendChild(div);
-  });
+  el.innerHTML = messages.map(d => `
+    <div class="msg-bubble msg-${d.sender==='user'?'user':'admin'}">
+      ${esc(d.text)}<div class="msg-time">${fmtTime(d.timestamp)}</div>
+    </div>
+  `).join('');
   el.scrollTop = el.scrollHeight;
 }
 
 window.sendAdminMsg = async () => {
   const input = document.getElementById('cw-input');
   if (!input?.value.trim() || !currentChatUID) return;
-  const messageText = input.value.trim();
-  const newMsgRef = push(ref(db, `chats/${currentChatUID}`));
-  await set(newMsgRef, {
-    sender: 'admin', text: messageText, timestamp: Date.now()
+  await push(ref(db, `chats/${currentChatUID}`), {
+    sender: 'admin', text: input.value.trim(), timestamp: Date.now()
   });
   input.value = '';
 };
