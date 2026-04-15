@@ -243,8 +243,6 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
 .vmc-title{font-size:.85rem;font-weight:700;color:#fff;}
 .vmc-page{font-size:.68rem;color:rgba(255,255,255,.45);margin-top:1px;}
 .vmc-body{padding:16px;}
-/* Removed .vmc-tabs and .vmc-tab styles */
-/* Removed .vmc-panel styles */
 .vmc-preview-thumb{width:100%;height:130px;background:var(--light);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--text3);margin-top:10px;overflow:hidden;position:relative;}
 /* NEW: Style for video element inside preview thumbnail */
 .vmc-preview-thumb video {
@@ -252,8 +250,8 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
   height: 100%;
   object-fit: contain; /* Ensures the whole video is visible */
   border-radius: 9px;
+  background: #000; /* Ensure black background if video doesn't fill */
 }
-/* Removed .vmc-preview-thumb iframe style */
 .vmc-status{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;margin-top:10px;}
 .vmc-status.set{color:var(--green);}
 .vmc-status.unset{color:var(--text3);}
@@ -525,7 +523,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
           <div class="qa-card" onclick="navTo('services')"><div class="qa-ico">🦷</div><div class="qa-title">Edit Services</div></div>
           <div class="qa-card" onclick="navTo('consultations')"><div class="qa-ico">💬</div><div class="qa-title">Reply Patients</div></div>
           <!-- New: Example for broadcast button -->
-          <div class="qa-card" onclick="promptAndSendBroadcast()"><div class="qa-ico">📢</div><div class="qa-title">Send Broadcast</div></div>
+          <div class="qa-card" onclick="openSlidePanel('broadcast')"><div class="qa-ico">📢</div><div class="qa-title">Send Broadcast</div></div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
@@ -830,6 +828,29 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
   </div>
 </div>
 
+<!-- BROADCAST PANEL (New Feature) -->
+<div class="slide-panel" id="sp-broadcast">
+  <div class="sp-hdr">
+    <div class="sp-title"><i class="fas fa-bullhorn"></i> Send Broadcast</div>
+    <button class="sp-close" onclick="closeSlidePanel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="sp-body">
+    <div class="fg"><label>Broadcast Title *</label><input type="text" id="bc-title" placeholder="e.g. Special Eid Discount!"></div>
+    <div class="fg"><label>Message *</label><textarea id="bc-body" placeholder="Write your announcement here..."></textarea></div>
+    <div class="fg">
+      <label>Attach Image (Optional)</label>
+      <div class="fg-upload" onclick="document.getElementById('bc-img-file').click()">
+        <input type="file" id="bc-img-file" accept="image/*" onchange="handleBcImg(this)">
+        <i class="fas fa-image"></i>
+        <p>Click to upload image</p>
+      </div>
+      <img id="bc-img-preview" class="img-preview" style="display:none; width:100%; height:auto;">
+    </div>
+    <button class="btn btn-rose" onclick="sendBroadcast()" id="bc-send-btn" style="width:100%; margin-top:15px;"><i class="fas fa-paper-plane"></i> Send to All Users</button>
+  </div>
+</div>
+
+
 <!-- NOTIFICATIONS PANEL -->
 <div class="sound-notif" id="sound-notif">
   <div class="sn-ico" id="sn-ico"></div>
@@ -847,9 +868,9 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, push, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; // Added firestore modules
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js"; // Added messaging modules
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"; // NEW: Firebase Storage modules
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js"; // Messaging commented out, as server-side logic is needed for true push notifications
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyDulYuUV4Km2e67SSzveNl9poq90-EhkU8",
@@ -865,8 +886,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app); // Realtime Database
 const firestoreDb = getFirestore(app); // Firestore Database
-const messaging = getMessaging(app); // Firebase Cloud Messaging
-const storage = getStorage(app); // NEW: Initialize Firebase Storage
+// const messaging = getMessaging(app); // Firebase Cloud Messaging - commented out
+const storage = getStorage(app); // Initialize Firebase Storage
 
 // =======================================================================
 // IMPORTANT: Only these emails will be allowed to log into the admin panel.
@@ -876,7 +897,7 @@ const ADMIN_EMAILS = [
 ];
 // =======================================================================
 
-const VAPID_KEY = "BDCIX9UAIBDhv5LAGIaPMzgonv5eLr55dQdeEMlkO8Qqcgg_m2cvwn43L0cidvWoL28Ovhi7iUA9fqxpbdgRCbs";
+// const VAPID_KEY = "BDCIX9UAIBDhv5LAGIaPMzgonv5eLr55dQdeEMlkO8Qqcgg_m2cvwn43L0cidvWoL28Ovhi7iUA9fqxpbdgRCbs"; // VAPID key commented out
 
 let currentChatUID = null;
 let bookingsData = {};
@@ -884,54 +905,34 @@ let prevBookingCount = 0;
 let prevChatCount = {};
 let soundOn = true;
 
-// 1. Service Worker Register Karna
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js').then((registration) => {
-    console.log('Service Worker Registered');
-  });
-}
+// Service Worker and FCM Setup for admin to *receive* notifications - commented out as true FCM push requires backend.
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker.register('/firebase-messaging-sw.js').then((registration) => {
+//     console.log('Service Worker Registered');
+//   });
+// }
+// async function initNotification(userId) {
+//   try {
+//     const permission = await Notification.requestPermission();
+//     if (permission === "granted") {
+//       const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+//       console.log("Admin FCM Token Ready");
+//       await setDoc(doc(firestoreDb, "users", userId), {
+//         token: token,
+//         role: 'admin'
+//       }, { merge: true });
+//     } else {
+//       toast('Notifications blocked. Please enable them.', true);
+//     }
+//   } catch (error) {
+//     console.error("Error getting Admin token:", error);
+//   }
+// }
+// onMessage(messaging, (payload) => {
+//   toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
+//   playSound('notification');
+// });
 
-// 2. Admin se Notification Permission Lena aur Token Save Karna
-async function initNotification(userId) {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-      console.log("Admin FCM Token Ready");
-      // Admin ka token Firestore mein save kar rahe hain
-      await setDoc(doc(firestoreDb, "users", userId), {
-        token: token,
-        role: 'admin' // Yeh batayega backend ko ke yeh ADMIN hai
-      }, { merge: true });
-    } else {
-      toast('Notifications blocked. Please enable them.', true);
-    }
-  } catch (error) {
-    console.error("Error getting Admin token:", error);
-  }
-}
-
-// 3. Foreground Messages (Jab website open ho tab alert dena)
-onMessage(messaging, (payload) => {
-  toast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
-  playSound('notification');
-});
-
-// 4. Send Broadcast (Backend ko bolna ke sab ko message bhej do)
-window.promptAndSendBroadcast = async function() {
-  const title = prompt("Enter broadcast title:", "Important Update");
-  if (!title) return;
-  const body = prompt("Enter broadcast message:", "We have a new service available!");
-  if (body) {
-    // Database mein entry hogi, aur Firebase ka Backend (CMD wala) khud sab ko notifications bhej dega!
-    await push(ref(db, 'broadcasts'), {
-      title: title,
-      body: body,
-      timestamp: Date.now()
-    });
-    toast('✅ Broadcast sending started!');
-  }
-};
 
 // ── 12 VIDEO SECTIONS ──
 window.VIDEO_DEFS = [
@@ -988,7 +989,7 @@ onAuthStateChanged(auth, user => {
     document.getElementById('tb-av').textContent = initial;
     document.getElementById('tb-name').textContent = name;
     initAllData();
-    initNotification(user.uid); // Request FCM token for admin
+    // initNotification(user.uid); // Request FCM token for admin - commented out
   } else {
     // If a user is logged in but their email is NOT in the ADMIN_EMAILS list,
     // or if no user is logged in, show the login screen.
@@ -1031,7 +1032,7 @@ function loadDashboard() {
     if (cnt > 0) {
       const list = Object.entries(bookingsData).map(([id,b])=>({id,...b})).sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
       el.innerHTML = list.map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border)">
-        <div style="width:36px;height:36px;border-radius:10px;background:var(--rose-pale);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:var(--rose);flex-shrink:0">${b.name?b.name[0].toUpperCase():'?'}</div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--rose-pale);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:var(--rose);flex-shrink:0">${(b.name && b.name[0].toUpperCase()) || '?'}</div>
         <div style="flex:1;overflow:hidden"><div style="font-size:.84rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.name)}</div><div style="font-size:.72rem;color:var(--text3)">${esc(b.service||'—')}</div></div>
         <span class="badge b-${b.status||'pending'}">${b.status||'pending'}</span>
       </div>`).join('');
@@ -1118,13 +1119,6 @@ function loadBookings() {
     const prev = prevBookingCount;
     const curr = Object.keys(bookingsData).length;
 
-    // Moved new booking notification logic to loadDashboard where it's immediately visible
-    // if (curr > prev && prev > 0) {
-    //   playSound('booking');
-    //   showNotif('booking','📅 New Booking!','A new appointment has been booked');
-    // }
-    // prevBookingCount = curr; // This is now updated in loadDashboard too for consistency
-
     renderBookings(Object.entries(bookingsData).map(([id,b])=>({id,...b})).sort((a,b)=>b.createdAt-a.createdAt));
   });
 }
@@ -1162,18 +1156,12 @@ window.filterBookings = () => {
 window.confirmBooking = async(id)=>{
   await update(ref(db,`bookings/${id}`),{status:'confirmed'});
   toast('✅ Booking confirmed!');
-  const booking = bookingsData[id];
-  if (booking && booking.uid) {
-    sendNotificationToUserFromAdmin(booking.uid, "Booking Confirmed", "Your appointment has been confirmed.", "/my-bookings");
-  }
+  // sendNotificationToUserFromAdmin is commented out as it requires a backend
 };
 window.cancelBooking  = async(id)=>{
   await update(ref(db,`bookings/${id}`),{status:'cancelled'});
   toast('⚠️ Booking cancelled');
-  const booking = bookingsData[id];
-  if (booking && booking.uid) {
-    sendNotificationToUserFromAdmin(booking.uid, "Booking Cancelled", "Your appointment has been cancelled.", "/my-bookings");
-  }
+  // sendNotificationToUserFromAdmin is commented out as it requires a backend
 };
 window.deleteBooking  = async(id)=>{if(!confirm('Delete this booking?'))return;await remove(ref(db,`bookings/${id}`));toast('🗑 Deleted');};
 
@@ -1198,12 +1186,12 @@ function loadReviews() {
 }
 window.approveReview = async(id)=>{await update(ref(db,`reviews/${id}`),{approved:true});toast('✅ Review published!');};
 window.deleteReview  = async(id)=>{if(!confirm('Delete?'))return;await remove(ref(db,`reviews/${id}`));toast('🗑 Review deleted');};
+
 // ── CONSULTATIONS / CHAT ──
 window.unreadCounts = window.unreadCounts || {};
 window.chatListenersAdded = window.chatListenersAdded || {};
-window.presenceListeners = window.presenceListeners || {}; // ✅ Presence track karne ke liye
+window.presenceListeners = window.presenceListeners || {};
 
-// Sidebar wale total badge ko update karne ka function
 function updateTotalConsultBadge() {
   let total = 0;
   for (const uid in window.unreadCounts) {
@@ -1242,14 +1230,13 @@ function loadChats() {
         const u = allUsers[uid] || {};
         const name = u.name || 'Patient';
         const email = u.email || 'No Email';
-        const phone = u.phone ? ` · ${u.phone}` : '';
+        const phone = u.whatsapp ? ` · ${u.whatsapp}` : ''; // Using whatsapp from firestore
         const subText = `${email}${phone}`;
         const color = colors[i % colors.length];
         const isActive = (currentChatUID === uid) ? 'active' : '';
         const unread = window.unreadCounts[uid] || 0;
         const badgeHtml = (unread > 0 && currentChatUID !== uid) ? `<span class="chat-unread">${unread}</span>` : '';
 
-        // ✅ Online dot — pehle offline, presence listener update karega
         html += `
           <div class="chat-item ${isActive}" onclick="selectChat('${uid}','${esc(name)}','${color}')" id="ci-${uid}">
             <div style="position:relative;width:42px;height:42px;flex-shrink:0">
@@ -1258,7 +1245,7 @@ function loadChats() {
                 position:absolute;bottom:1px;right:1px;
                 width:10px;height:10px;border-radius:50%;
                 background:#6b7280;
-                border:2px solid var(--bg2, #1e1e2e);
+                border:2px solid var(--off); /* Changed border to off-white to contrast with the dark dot if needed */
                 display:inline-block;
               "></span>
             </div>
@@ -1273,23 +1260,22 @@ function loadChats() {
       el.innerHTML = html;
       el.scrollTop = scrollTop;
 
-      // ✅ Har user ka presence listen karna
+      // Listen for presence
       chatUids.forEach(uid => {
         if (!window.presenceListeners[uid]) {
           window.presenceListeners[uid] = true;
-          // Firebase Realtime DB presence — users/{uid}/online node se
-          onValue(ref(db, `users/${uid}/online`), snap => {
+          onValue(ref(firestoreDb, `users/${uid}/online`), snap => { // Listening to Firestore for presence
             const dot = document.getElementById(`presence-dot-${uid}`);
             if (dot) {
               const isOnline = snap.exists() && snap.val() === true;
-              dot.style.background = isOnline ? '#22c55e' : '#6b7280'; // green ya grey
+              dot.style.background = isOnline ? '#22c55e' : '#6b7280';
               dot.title = isOnline ? 'Online' : 'Offline';
             }
           });
         }
       });
 
-      // Naye Messages ka system
+      // Listen for new messages
       chatUids.forEach(uid => {
         if (!window.chatListenersAdded[uid]) {
           window.chatListenersAdded[uid] = true;
@@ -1303,8 +1289,8 @@ function loadChats() {
             if (userMsgs.length > prevCnt && prevCnt > 0) {
               if (currentChatUID !== uid) {
                 const uName = (allUsers[uid] && allUsers[uid].name) ? allUsers[uid].name : 'Patient';
-                playSound('consult');   // ✅ Beep
-                showNotif('consult', `💬 New message from ${uName}`, userMsgs[userMsgs.length-1].text?.substring(0,60)||''); // ✅ Notification
+                playSound('consult');
+                showNotif('consult', `💬 New message from ${uName}`, userMsgs[userMsgs.length-1].text?.substring(0,60)||'');
 
                 window.unreadCounts[uid] = (window.unreadCounts[uid] || 0) + 1;
 
@@ -1374,7 +1360,7 @@ window.sendAdminMsg = async () => {
   await push(ref(db, `chats/${currentChatUID}`), {
     sender: 'admin', text: messageText, timestamp: Date.now()
   });
-  sendNotificationToUserFromAdmin(currentChatUID, "Admin replied to your consultation", messageText, "/consultation");
+  // Removed client-side FCM notification as it requires backend or exposed API keys.
   input.value = '';
 }; 
 // ── VIDEOS ──
@@ -1388,11 +1374,12 @@ function loadVideos() {
 function renderVideos(saved) {
   const grid = document.getElementById('videos-grid');
   grid.innerHTML = window.VIDEO_DEFS.map(v => {
-    const curVal = saved[v.key] || ''; // This will be the download URL from Firebase Storage
-    const isSet = !!curVal;
+    const videoData = saved[v.key] || {}; // Now expecting an object { url: ..., likes: ... }
+    const url = videoData.url || '';
+    const isSet = !!url;
     let previewContent = '';
-    if (isSet && curVal.startsWith('https://firebasestorage.googleapis.com/')) {
-      previewContent = `<video controls src="${esc(curVal)}" style="width:100%; height:100%; object-fit:contain; background: #000;" poster="${NOTIFICATION_ICON_URL}"></video>`;
+    if (isSet) {
+      previewContent = `<video controls src="${esc(url)}" style="width:100%; height:100%; object-fit:contain; background: #000;"></video>`;
     } else {
       previewContent = `<i class="fas fa-play-circle" style="font-size:2rem; color:var(--text3);"></i>`;
     }
@@ -1419,15 +1406,12 @@ function renderVideos(saved) {
         </div>
         <div class="vmc-status ${isSet?'set':'unset'}">
           <i class="fas fa-${isSet?'check-circle':'times-circle'}"></i>
-          ${isSet ? `Video Set: <a href="${esc(curVal)}" target="_blank" style="color:inherit; text-decoration:underline;">View video</a>` : 'Not set — using default placeholder'}
+          ${isSet ? `Video Set: <a href="${esc(url)}" target="_blank" style="color:inherit; text-decoration:underline;">View video</a>` : 'Not set — using default placeholder'}
         </div>
       </div>
     </div>`;
   }).join('');
 }
-
-// REMOVED: window.switchVTab and window.saveVideoId are no longer needed.
-// REMOVED: window.previewVid in its old form is no longer needed. The preview is now a video player.
 
 window.handleVideoUpload = (input, key) => {
   const file = input.files[0];
@@ -1465,8 +1449,8 @@ window.handleVideoUpload = (input, key) => {
       // Upload completed successfully, get the download URL
       getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
         console.log('File available at', downloadURL);
-        // Save the download URL to Realtime Database
-        set(ref(db, `videos/${key}`), downloadURL).then(() => {
+        // Save the download URL and metadata to Realtime Database
+        set(ref(db, `videos/${key}`), { url: downloadURL, uploadedAt: Date.now(), likes: 0 }).then(() => {
           statusEl.innerHTML = `✅ Successfully uploaded <strong>${esc(file.name)}</strong>`;
           progressBarEl.style.display = 'none'; // Hide progress bar on success
           toast(`✅ Video "${esc(file.name)}" uploaded and updated!`);
@@ -1536,7 +1520,7 @@ function renderDoctors(list) {
 
 window.searchDoctors = (q) => {
   if (!q) { renderDoctors(allDoctors); return; }
-  renderDoctors(allDoctors.filter(d => d.name.toLowerCase().includes(q.toLowerCase()) || d.spec.toLowerCase().includes(q.toLowerCase())));
+  renderDoctors(allDoctors.filter(d => (d.name||'').toLowerCase().includes(q.toLowerCase()) || (d.spec||'').toLowerCase().includes(q.toLowerCase())));
 };
 
 let docImgBase64 = '';
@@ -1587,7 +1571,7 @@ window.saveDoctor = async () => {
 
 window.editDoctor = (id) => {
   const d = allDoctors.find(x=>x.id===id);
-  if (!d||d.isStatic) return;
+  if (!d||d.isStatic) { toast('Cannot edit default doctors', true); return; }
   document.getElementById('ed-id').value = id;
   document.getElementById('ed-name').value = d.name||'';
   document.getElementById('ed-spec').value = d.spec||'';
@@ -1650,6 +1634,64 @@ window.saveService = async () => {
 };
 
 window.deleteService = async (id) => { if(!confirm('Delete?'))return; await remove(ref(db,`services/${id}`)); toast('🗑 Service deleted'); };
+
+// ── BROADCAST SYSTEM WITH IMAGE ──
+let bcImgFile = null;
+
+window.handleBcImg = (input) => {
+    bcImgFile = input.files[0];
+    if (bcImgFile) {
+        const r = new FileReader();
+        r.onload = e => {
+            const preview = document.getElementById('bc-img-preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        r.readAsDataURL(bcImgFile);
+    }
+};
+
+window.sendBroadcast = async () => {
+    const title = document.getElementById('bc-title').value.trim();
+    const body = document.getElementById('bc-body').value.trim();
+    if (!title || !body) return toast('⚠️ Please enter Title and Message', true);
+
+    const btn = document.getElementById('bc-send-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Broadcast...';
+    btn.disabled = true;
+
+    try {
+        let imageUrl = "";
+        if (bcImgFile) {
+            const imgRef = storageRef(storage, `broadcasts/${Date.now()}_${bcImgFile.name}`);
+            const uploadTask = await uploadBytesResumable(imgRef, bcImgFile);
+            imageUrl = await getDownloadURL(imgRef);
+        }
+
+        await push(ref(db, 'broadcasts'), {
+            title: title,
+            body: body,
+            image: imageUrl,
+            timestamp: Date.now()
+        });
+
+        toast('✅ Broadcast Sent successfully!');
+        closeSlidePanel();
+        
+        // Reset Fields
+        document.getElementById('bc-title').value = '';
+        document.getElementById('bc-body').value = '';
+        document.getElementById('bc-img-preview').style.display = 'none';
+        bcImgFile = null;
+
+    } catch (err) {
+        console.error("Broadcast Error: ", err);
+        toast('❌ Failed to send broadcast', true);
+    } finally {
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send to All Users';
+        btn.disabled = false;
+    }
+};
 
 // ── SOUND ENGINE (Web Audio API) ──
 let AudioCtx = null;
@@ -1813,15 +1855,6 @@ document.addEventListener('click', e => {
 document.getElementById('l-pass')?.addEventListener('keypress', e => { if(e.key==='Enter') window.doLogin?.(); });
 document.getElementById('cw-input')?.addEventListener('keypress', e => { if(e.key=='Enter') window.sendAdminMsg?.(); });
 
-// New: Prompt for broadcast message
-window.promptAndSendBroadcast = function() {
-  const title = prompt("Enter broadcast title:", "Important Update");
-  if (!title) return;
-  const body = prompt("Enter broadcast message:", "We have a new service available!");
-  if (body) {
-    sendBroadcastNotificationFromAdmin(title, body);
-  }
-};
 </script>
 </body>
 </html>
