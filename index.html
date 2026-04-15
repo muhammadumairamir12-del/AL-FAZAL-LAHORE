@@ -127,12 +127,14 @@ input,select,textarea{font-family:var(--font);}
 .nav-btn-book:hover{transform:translateY(-2px);box-shadow:var(--sh-rose);}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:5px;}
 .hamburger span{width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all .3s;display:block;}
-.mob-nav{position:fixed;top:72px;left:0;right:0;background:#fff;z-index:999;padding:20px 5% 28px;border-bottom:1px solid var(--border);transform:translateY(-110%);transition:transform .4s var(--ease);box-shadow:var(--sh3);}
-.mob-nav.open{transform:translateY(0);}
-.mob-nav a{display:block;padding:12px 0;font-size:.93rem;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);cursor:pointer;}
-.mob-nav a:hover{color:var(--rose);}
-.mob-nav .mob-book{margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;}
-
+/* --- MOBILE SIDEBAR MENU --- */
+.mob-overlay {position: fixed;inset: 0;background: rgba(11,31,58,0.6);z-index: 1001;opacity: 0;visibility: hidden;transition: all 0.3s;}
+.mob-overlay.show {opacity: 1;visibility: visible;}
+.mob-nav {position: fixed;top: 15px;right: 15px;bottom: 15px;width: 280px;background: #fff;border-radius: 20px;z-index: 1002;padding: 75px 20px 25px;transform: translateX(120%);transition: transform 0.4s var(--ease);box-shadow: -10px 10px 40px rgba(11,31,58,0.25);overflow-y: auto;display: flex;flex-direction: column;}
+.mob-nav.open {transform: translateX(0);}
+.mob-nav a {display: block;padding: 14px 10px;font-size: .95rem;font-weight: 600;color: var(--text2);border-bottom: 1px solid var(--border);cursor: pointer;transition: all 0.2s;}
+.mob-nav a:hover {color: var(--rose); padding-left: 15px; background: var(--rose-pale);}
+.mob-nav .mob-book {margin-top: auto; display: flex; justify-content: center; align-items: center; gap: 8px; background: linear-gradient(135deg,var(--rose),var(--rose2)); color: #fff; padding: 14px; border-radius: 8px; font-weight: 700; border: none;}
 /* ── EMERGENCY BAR ── */
 .emergency{background:var(--rose);padding:12px 5%;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;}
 .emergency p{color:#fff;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;}
@@ -621,24 +623,48 @@ footer{background:#04111e;padding:65px 5% 26px;}
   .contact-grid{grid-template-columns:1fr;}
   .footer-grid{grid-template-columns:1fr 1fr;}
 
-  /* About Page - Images below text on medium screens */
+ /* ========== FIX: VIDEO STACK + CENTER ON MOBILE ========== */
   .about-grid-content,
-  .dental-video-grid, .medical-video-grid, .doctors-video-grid,
+  .about-video-grid,
+  .dental-video-grid,
+  .medical-video-grid,
+  .doctors-video-grid,
   .patient-resources-grid {
-    grid-template-columns: 1fr; /* Stack into a single column */
-    gap: 30px; /* Adjust gap for stacking */
+    grid-template-columns: 1fr !important; /* inline style override */
+    display: flex !important;              /* inline style override */
+    flex-direction: column !important;
+    gap: 30px;
+    align-items: center;
   }
-  .about-grid-content { /* Specific order for About intro section */
-    flex-direction: column-reverse; /* Image content below text content */
+
+  /* Text wala div — upar rahe */
+  .about-video-grid > div:not(.video-card-wrap),
+  .dental-video-grid > div:not(.video-card-wrap),
+  .medical-video-grid > div:not(.video-card-wrap),
+  .doctors-video-grid > div:not(.video-card-wrap) {
+    order: 1;
+    width: 100%;
+    text-align: center;
   }
-  /* For video sections, make sure text is first, then video */
-  .about-video-grid, .doctors-video-grid {
-    display: flex;
-    flex-direction: column-reverse; /* Text first, then video */
+
+  /* Video — text ke NEECHE aaye, center mein */
+  .about-video-grid .video-card-wrap,
+  .dental-video-grid .video-card-wrap,
+  .medical-video-grid .video-card-wrap,
+  .doctors-video-grid .video-card-wrap {
+    order: 2;
+    width: 100%;
+    max-width: 580px;
+    margin: 0 auto;
   }
-  .dental-video-grid, .medical-video-grid {
-    display: flex;
-    flex-direction: column; /* Text first, then video (already naturally stacked but explicit) */
+
+  /* Buttons center mein */
+  .about-video-grid .btn,
+  .dental-video-grid .btn,
+  .medical-video-grid .btn,
+  .doctors-video-grid .btn {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 @media(max-width:768px){
@@ -801,20 +827,27 @@ footer{background:#04111e;padding:65px 5% 26px;}
   </div>
 </nav>
 
-<!-- MOBILE NAV -->
+<!-- MOBILE NAV OVERLAY & SIDEBAR -->
+<div class="mob-overlay" id="mob-overlay" onclick="toggleMob(true)"></div>
 <div class="mob-nav" id="mob-nav">
-  <a onclick="goPage('home');toggleMob(true)">Home</a>
-  <a onclick="goPage('about');toggleMob(true)">About</a>
-  <a onclick="goPage('dental-services');toggleMob(true)">Dental Services</a>
-  <a onclick="goPage('medical-services');toggleMob(true)">Medical Services</a>
-  <a onclick="goPage('doctors');toggleMob(true)">Doctors</a>
-  <a onclick="goPage('treatments');toggleMob(true)">Treatments</a>
-  <a onclick="goPage('patients');toggleMob(true)">Patients</a>
-  <a onclick="goPage('reviews');toggleMob(true)">Reviews</a>
-  <a onclick="goPage('gallery');toggleMob(true)">Gallery</a>
-  <a onclick="goPage('contact');toggleMob(true)">Contact</a>
-  <a href="#" onclick="openAuthModal('login');toggleMob(true)" style="color:var(--navy3)"><i class="fas fa-user"></i> Login / Sign Up</a>
-  <a class="mob-book" onclick="goPage('book');toggleMob(true)"><i class="fas fa-calendar-check"></i> Book Appointment</a>
+  <div style="position:absolute; top:20px; right:20px; font-size:1.5rem; cursor:pointer; color:var(--navy);" onclick="toggleMob(true)"><i class="fas fa-times"></i></div>
+  
+  <a onclick="goPage('home'); toggleMob(true);">Home</a>
+  <a onclick="goPage('about'); toggleMob(true);">About</a>
+  
+  <div style="font-weight:800; font-size:0.75rem; color:var(--text3); margin:15px 0 5px 10px; text-transform:uppercase; letter-spacing:1px;">Services</div>
+  <a onclick="goPage('dental-services'); toggleMob(true);" style="padding-left:25px; font-size:0.85rem;"><i class="fas fa-tooth" style="color:var(--rose); width:20px;"></i> Dental Services</a>
+  <a onclick="goPage('medical-services'); toggleMob(true);" style="padding-left:25px; font-size:0.85rem;"><i class="fas fa-stethoscope" style="color:var(--navy3); width:20px;"></i> Medical Services</a>
+  
+  <a onclick="goPage('doctors'); toggleMob(true);">Doctors</a>
+  <a onclick="goPage('treatments'); toggleMob(true);">Treatments</a>
+  <a onclick="goPage('patients'); toggleMob(true);">Patients</a>
+  <a onclick="goPage('reviews'); toggleMob(true);">Reviews</a>
+  <a onclick="goPage('gallery'); toggleMob(true);">Gallery</a>
+  <a onclick="goPage('contact'); toggleMob(true);">Contact</a>
+  
+  <a href="#" onclick="openAuthModal('login'); toggleMob(true);" style="color:var(--navy3); margin-top:20px; border:none;"><i class="fas fa-user"></i> Login / Sign Up</a>
+  <a class="mob-book" onclick="goPage('book'); toggleMob(true);"><i class="fas fa-calendar-check"></i> Book Now</a>
 </div>
 
 <!-- EMERGENCY BAR -->
@@ -1784,8 +1817,6 @@ import {
   getFirestore, doc, setDoc, getDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; // Added Firestore imports
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
-
 
 // ── FIREBASE CONFIG ──
 const firebaseConfig = {
@@ -1805,11 +1836,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const firestore = getFirestore(app); // Initialized Firestore
 const storage = getStorage(app);
-const messaging = getMessaging(app);
 const googleProvider = new GoogleAuthProvider();
-
-// IMPORTANT: Replace this with your actual VAPID key from Firebase Console
-const VAPID_KEY = "YOUR_VAPID_KEY_HERE";
 
 const ADMIN_EMAIL = "infoskyeagle12@gmail.com";
 let currentUser = null;
@@ -1877,74 +1904,17 @@ const VIDEO_SECTIONS = [
   {key:'gallery_stories', label:'Gallery Page — Video 3',         selector:'[data-video-key="gallery_stories"]', defaultPoster:'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80'},
 ];
 
-// ── FCM NOTIFICATION FUNCTIONS ──
-let swRegistration = null;
-
-// 1. Service Worker Register Karna
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js').then((registration) => {
-    console.log('✅ Service Worker Registered!');
-    swRegistration = registration;
-    // Agar user logged in hai to foran token generate karo
-    if (currentUser) {
-      requestNotificationPermissionAndToken();
-    }
-  }).catch(err => console.log('❌ SW Registration failed:', err));
-}
-
-// 2. Token Generate Karna aur Firestore mein Save karna
-async function requestNotificationPermissionAndToken() {
-  if (!currentUser || !swRegistration) return;
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      const currentToken = await getToken(messaging, {
-        vapidKey: VAPID_KEY,
-        serviceWorkerRegistration: swRegistration
-      });
-      if (currentToken) {
-        console.log("✅ FCM Token generated successfully!");
-        // Save Token to Database
-        await setDoc(doc(firestore, "users", currentUser.uid), { 
-          fcmToken: currentToken,
-          token: currentToken 
-        }, { merge: true });
-      } else {
-        console.log("⚠️ No FCM token received.");
-      }
-    } else {
-      showToast("❌ Notifications blocked by user.", true);
-    }
-  } catch (err) {
-    console.error("❌ Token Error:", err);
-  }
-}
-
-// Listen for Foreground Messages
-onMessage(messaging, (payload) => {
-  console.log('Foreground FCM message received:', payload);
-  showToast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
-  notificationSound.play().catch(e => {});
-});
-
 // ── AUTH STATE ──
 onAuthStateChanged(auth, user => {
   currentUser = user;
   updateNavForUser(user);
 
+  // Handle Free Consultation page UI (always show chat, but load history if logged in)
   loadConsultChat(user?.uid);
 
+  // Handle My Bookings page (only load if logged in)
   if (user) {
-    // Agar SW pehle se ready hai tou token maango
-    if (swRegistration) {
-      requestNotificationPermissionAndToken();
-    }
-    
     loadMyBookings(user.uid);
-    if (document.getElementById('chat-box')?.classList.contains('open')) {
-      loadUserChat(user.uid);
-    }
-    processPendingActions();
   } else {
     const myBookingsContainer = document.getElementById('my-bookings-container');
     if (myBookingsContainer && document.getElementById('pg-my-bookings')?.classList.contains('active')) {
@@ -1958,13 +1928,30 @@ onAuthStateChanged(auth, user => {
         </div>
       `;
     }
+    // Clear consultation chat if user logs out
     const consultMessagesContainer = document.getElementById('consult-messages');
     if (consultMessagesContainer) {
         consultMessagesContainer.innerHTML = '<div class="chat-msg admin">Welcome! Ask your health question and our doctors will reply soon. 👨‍⚕️</div>';
-        prevChatMessagesCount = {}; 
+        prevChatMessagesCount = {}; // Reset counts
     }
   }
+
+  // Handle Book Appointment page prompt visibility
+  const bookLoginPrompt = document.getElementById('book-login-prompt');
+  if (bookLoginPrompt) {
+    if (user) {
+      bookLoginPrompt.style.display = 'none';
+    } else {
+      bookLoginPrompt.style.display = 'block';
+    }
+  }
+
+  // Process pending actions after successful login
+  if (user) {
+      processPendingActions();
+  }
   
+  // Re-load videos with updated like status for current user
   loadVideoIdsFromDb();
 });
 
@@ -2509,6 +2496,7 @@ window.playVideo = function(card) {
 
   if (!playerContainer) return;
 
+  // 1. Agar koi aur video chal rahi hai to usay FORAN STOP kar do
   document.querySelectorAll('.video-card-wrap').forEach(otherCard => {
     if (otherCard !== card) {
       const otherPlayer = otherCard.querySelector('.video-player-container');
@@ -2522,37 +2510,60 @@ window.playVideo = function(card) {
     }
   });
 
+  // 2. Agar current video chal rahi hai to usay click karne par STOP kar do
   if (playerContainer.dataset.isPlaying === 'true') {
     playerContainer.innerHTML = '';
     playerContainer.style.display = 'none';
     playerContainer.dataset.isPlaying = 'false';
     if (thumb) thumb.style.display = 'block';
-  } else {
+  } 
+  // 3. Agar nahi chal rahi, to PLAY karo
+  else {
+    if (!videoUrl || videoUrl.trim() === '') {
+      showToast('⚠️ No video found! Admin has not uploaded a video yet.', true);
+      return;
+    }
+
     playerContainer.innerHTML = '';
 
-    if (videoUrl && videoUrl.startsWith('https://firebasestorage.googleapis.com/')) {
+    // FIREBASE STORAGE VIDEO (Admin ne jo upload ki hai)
+    if (videoUrl.includes('.mp4') || videoUrl.startsWith('https://firebasestorage.googleapis.com/')) {
       const videoEl = document.createElement('video');
       videoEl.src = videoUrl;
       videoEl.controls = true;
       videoEl.autoplay = true;
+      videoEl.playsInline = true;
       videoEl.style.width = '100%';
       videoEl.style.height = '100%';
+      videoEl.style.objectFit = 'cover';
+      
       playerContainer.appendChild(videoEl);
-    } else if (videoUrl && (videoUrl.includes('vimeo.com') || videoUrl.match(/^\d+$/))) {
+      
+      // Autoplay handle (Browsers block unmuted autoplay)
+      let playPromise = videoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("Autoplay blocked by browser. Muting to allow play.");
+          videoEl.muted = true;
+          videoEl.play();
+        });
+      }
+    } 
+    // Fallback for Vimeo
+    else if (videoUrl.includes('vimeo.com') || videoUrl.match(/^\d+$/)) {
       const vimeoId = videoUrl.match(/vimeo\.com\/(\d+)/)?.[1] || videoUrl;
-      playerContainer.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&controls=1&title=0&byline=0&portrait=0" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-    } else if (videoUrl && (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.startsWith('yt:'))) {
+      playerContainer.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&controls=1" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+    } 
+    // Fallback for YouTube
+    else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.startsWith('yt:')) {
       const ytMatch = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
       const youtubeId = ytMatch ? ytMatch[1] : (videoUrl.startsWith('yt:') ? videoUrl.substring(3) : null);
       if (youtubeId) {
         playerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&controls=1&modestbranding=1&rel=0" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
       } else {
-        showToast('Invalid YouTube video URL/ID provided!', true);
+        showToast('Invalid YouTube link!', true);
         return;
       }
-    } else {
-      showToast('No valid video source found for this card!', true);
-      return;
     }
 
     playerContainer.style.display = 'block';
@@ -2561,12 +2572,11 @@ window.playVideo = function(card) {
   }
 };
 
-
-// Load video URLs and like counts/status from DB and apply to all video cards
+// ── LOAD VIDEOS FROM FIREBASE ──
 function loadVideoIdsFromDb() {
   onValue(ref(db, 'videos'), snap => {
     const videos = snap.val() || {};
-    VIDEO_SECTIONS.forEach(async sec => { // Use async because we might fetch user-specific like status
+    VIDEO_SECTIONS.forEach(async sec => { 
       const videoElement = document.querySelector(sec.selector);
       if (videoElement) {
         const storedUrl = videos[sec.key]?.url || '';
@@ -2576,7 +2586,6 @@ function loadVideoIdsFromDb() {
 
         const posterImg = videoElement.querySelector('.video-poster');
         if (posterImg) {
-          // If a custom poster is set in DB, use it, otherwise fallback to default
           posterImg.src = videos[sec.key]?.poster || sec.defaultPoster;
         }
 
@@ -2585,7 +2594,6 @@ function loadVideoIdsFromDb() {
           likeCountSpan.textContent = likeCount;
         }
 
-        // Correctly select the like button using its data-video-key
         const likeBtn = videoElement.querySelector(`.v-action-btn[data-video-key="${sec.key}"]`);
         if (likeBtn) {
           if (currentUser) {
@@ -2596,7 +2604,7 @@ function loadVideoIdsFromDb() {
               likeBtn.classList.remove('liked');
             }
           } else {
-            likeBtn.classList.remove('liked'); // Not logged in, so not liked
+            likeBtn.classList.remove('liked'); 
           }
         }
       }
@@ -2604,9 +2612,9 @@ function loadVideoIdsFromDb() {
   });
 }
 
-
+// ── LIKE SYSTEM ──
 window.toggleLike = async (btn) => {
-  event.stopPropagation(); // Prevent the video card from playing/pausing
+  event.stopPropagation(); // Video play hone se rokega
 
   if (!currentUser) {
     openAuthModal('login');
@@ -2615,10 +2623,7 @@ window.toggleLike = async (btn) => {
   }
 
   const videoKey = btn.dataset.videoKey;
-  if (!videoKey) {
-    console.error("Video key not found for like button.");
-    return;
-  }
+  if (!videoKey) return;
 
   const userLikeRef = ref(db, `userLikes/${currentUser.uid}/${videoKey}`);
   const videoRef = ref(db, `videos/${videoKey}`);
@@ -2628,28 +2633,27 @@ window.toggleLike = async (btn) => {
     const isLiked = userLikeSnap.exists() && userLikeSnap.val() === true;
 
     if (isLiked) {
-      // Unlike the video
-      await set(userLikeRef, null); // Remove user's like entry
-      await update(videoRef, { likes: increment(-1) }); // Decrement total likes
+      await set(userLikeRef, null); 
+      await update(videoRef, { likes: increment(-1) }); 
       btn.classList.remove('liked');
       btn.querySelector('.like-count').textContent = parseInt(btn.querySelector('.like-count').textContent) - 1;
       showToast('👎 Unliked!');
     } else {
-      // Like the video
-      await set(userLikeRef, true); // Add user's like entry
-      await update(videoRef, { likes: increment(1) }); // Increment total likes
+      await set(userLikeRef, true); 
+      await update(videoRef, { likes: increment(1) }); 
       btn.classList.add('liked');
       btn.querySelector('.like-count').textContent = parseInt(btn.querySelector('.like-count').textContent) + 1;
       showToast('❤️ Liked!');
     }
   } catch (error) {
     console.error("Error toggling like:", error);
-    showToast('❌ Failed to toggle like. Please try again.', true);
+    showToast('❌ Error in liking video.', true);
   }
 };
 
-
+// ── SHARE SYSTEM ──
 window.shareVideo = (title) => {
+  event.stopPropagation(); // Video play hone se rokega
   if (navigator.share) {
     navigator.share({ title: title + ' — Al-Fazal Hospital', url: window.location.href });
   } else {
@@ -2658,8 +2662,61 @@ window.shareVideo = (title) => {
   }
 };
 
-window.downloadVideo = (btn) => {
-  showToast('📥 Video save feature coming soon!');
+// ── DOWNLOAD SYSTEM (Direct MP4 Download) ──
+window.downloadVideo = async (btn) => {
+  event.stopPropagation(); // Video play hone se rokega
+  
+  const card = btn.closest('.video-card-wrap');
+  const videoData = await get(ref(db, `videos/${card.dataset.videoKey}`));
+  const videoUrl = videoData.val()?.url || '';
+
+  if (!videoUrl || videoUrl.trim() === '') {
+    showToast('⚠️ Video is not available to download!', true);
+    return;
+  }
+
+  // Agar ghalti se Youtube waghera ka link ho to wo download nahi hota direct
+  if (videoUrl.includes('youtube') || videoUrl.includes('vimeo')) {
+    showToast('⚠️ Opening link... (YouTube videos cannot be directly downloaded)', true);
+    setTimeout(() => window.open(videoUrl, '_blank'), 1000);
+    return;
+  }
+
+  showToast('⏳ Fetching video to download... Please wait.');
+  
+  try {
+    // Firebase storage video ko pehle fetch kar ke blob (file format) me convert karta hai
+    // is tarah browser video ko naye tab me open karne k bajaye direct file save karta hai
+    const response = await fetch(videoUrl);
+    if (!response.ok) throw new Error("Network response was not ok");
+    
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = blobUrl;
+    a.download = `Al-Fazal-Video-${Date.now()}.mp4`; // Unique name se download hoga
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    window.URL.revokeObjectURL(blobUrl);
+    document.body.removeChild(a);
+    
+    showToast('✅ Download started successfully!');
+  } catch (error) {
+    console.error('Download failed due to CORS or network:', error);
+    // Agar Firebase me CORS rules set nahi hain to direct tab me open kar dega jahan se manually download ho jayegi
+    showToast('⏳ Opening in new tab to download...', true);
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    a.target = '_blank';
+    a.download = `Al-Fazal-Video-${Date.now()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 };
 
 // Helper functions (kept)
@@ -2734,12 +2791,7 @@ const pathToPageId = Object.fromEntries(Object.entries(pageRoutes).map(([key, va
 
 let currentPageId = 'home'; // Track current page for exit confirmation
 
-window.goPage = function(pageId, pushState = true) {
-    const path = pageRoutes[pageId];
-    if (!path) {
-        console.error('Unknown pageId:', pageId);
-        return;
-    }
+window.goPage = function(pageId, pushState = true) { const path = pageRoutes[pageId]; if (!path) { console.error('Unknown pageId:', pageId); return; }
 
     // Stop all videos before changing page
     document.querySelectorAll('.video-card-wrap').forEach(card => {
@@ -2788,11 +2840,8 @@ window.goPage = function(pageId, pushState = true) {
             parentServiceDD.classList.remove('anav');
         }
     }
-
-
-    // Close mobile menu if open
-    toggleMob(false); // Pass false to explicitly close
-
+    // Close mobile menu automatically when any link is clicked
+    toggleMob(true);
     // Re-initialize AOS for the new content
     setTimeout(() => window.initAOS(), 100);
 };
@@ -2860,15 +2909,17 @@ window.addEventListener('load', () => setTimeout(() => document.getElementById('
 window.toggleMob = function(forceClose = undefined) {
   const m = document.getElementById('mob-nav');
   const b = document.getElementById('hamburger');
+  const overlay = document.getElementById('mob-overlay'); // New overlay
   if (!m) return;
 
-  const isOpen = m.classList.contains('open');
-  if (forceClose === true) { // Explicitly close
+  if (forceClose === true) {
     m.classList.remove('open');
-  } else if (forceClose === false) { // Explicitly keep closed
-    // Do nothing, it's already closed or being told to stay closed
-  } else { // Toggle behavior if no explicit instruction
+    if(overlay) overlay.classList.remove('show');
+  } else if (forceClose === false) {
+    // do nothing
+  } else {
     m.classList.toggle('open');
+    if(overlay) overlay.classList.toggle('show');
   }
 
   const spans = b.querySelectorAll('span');
