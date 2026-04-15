@@ -716,9 +716,9 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
               </div>
 
               <!-- Existing static info below (can be made editable if needed) -->
-              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Admin Email</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">dryasirkhawaja@gmail.com </div></div>
-              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Website</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">Al-Fazal Medical &amp; Dental</div></div>
-              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:4px">Developer</div><div style="font-weight:700;font-size:.88rem;color:var(--rose)">SkyEagle Digital Agency 🚀</div></div>
+              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Admin Email</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">dryasirkhawaja@gmail.com </div></div>
+              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Website</div><div style="font-weight:700;font-size:.88rem;color:var(--text)">Al-Fazal Medical &amp; Dental</div></div>
+              <div style="background:var(--off);border-radius:9px;padding:13px"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px">Developer</div><div style="font-weight:700;font-size:.88rem;color:var(--rose)">SkyEagle Digital Agency 🚀</div></div>
               <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:9px;padding:13px;display:flex;align-items:center;gap:8px">
                 <span style="color:var(--green);font-size:1.1rem">✓</span>
                 <div style="font-weight:700;font-size:.88rem;color:var(--green)">Firebase Realtime DB Connected</div>
@@ -1191,6 +1191,15 @@ window.deleteReview  = async(id)=>{if(!confirm('Delete?'))return;await remove(re
 window.unreadCounts = window.unreadCounts || {};
 window.chatListenersAdded = window.chatListenersAdded || {};
 window.presenceListeners = window.presenceListeners || {};
+window.lastMessageTimestamps = {}; // مریضوں کو ترتیب دینے کے لیے
+
+// Local Storage Helpers
+window.getSeenCounts = () => JSON.parse(localStorage.getItem('admin_seen_chats') || '{}');
+window.saveSeenCount = (uid, count) => {
+  let seen = window.getSeenCounts();
+  seen[uid] = count;
+  localStorage.setItem('admin_seen_chats', JSON.stringify(seen));
+};
 
 function updateTotalConsultBadge() {
   let total = 0;
@@ -1210,6 +1219,7 @@ function updateTotalConsultBadge() {
 }
 
 function loadChats() {
+  // پورے 'chats' نوڈ پر لسنر تاکہ ترتیب (Sorting) برقرار رہے
   onValue(ref(db, 'chats'), chatSnap => {
     const el = document.getElementById('chat-patient-list');
     if (!chatSnap.exists()) {
@@ -1217,104 +1227,69 @@ function loadChats() {
       return;
     }
 
-    const chatUids = Object.keys(chatSnap.val());
+    const chatsData = chatSnap.val();
+    const chatUids = Object.keys(chatsData);
+
+    // ہر مریض کے آخری میسج کا ٹائم نکالنا تاکہ اسے ٹاپ پر لا سکیں
+    chatUids.forEach(uid => {
+      const msgs = Object.values(chatsData[uid]);
+      if (msgs.length > 0) {
+        window.lastMessageTimestamps[uid] = msgs[msgs.length - 1].timestamp;
+      }
+    });
+
+    // میسجز کو وقت کے حساب سے ترتیب دینا (نیا میسج سب سے اوپر)
+    chatUids.sort((a, b) => (window.lastMessageTimestamps[b] || 0) - (window.lastMessageTimestamps[a] || 0));
 
     get(ref(db, 'users')).then(userSnap => {
       const allUsers = userSnap.exists() ? userSnap.val() : {};
       const colors = ['#e8315a','#3b82f6','#10b981','#f59e0b','#8b5cf6','#06b6d4'];
-
       const scrollTop = el.scrollTop;
       let html = '';
 
       chatUids.forEach((uid, i) => {
         const u = allUsers[uid] || {};
         const name = u.name || 'Patient';
-        const email = u.email || 'No Email';
-        const phone = u.whatsapp ? ` · ${u.whatsapp}` : ''; // Using whatsapp from firestore
-        const subText = `${email}${phone}`;
         const color = colors[i % colors.length];
         const isActive = (currentChatUID === uid) ? 'active' : '';
-        const unread = window.unreadCounts[uid] || 0;
-        const badgeHtml = (unread > 0 && currentChatUID !== uid) ? `<span class="chat-unread">${unread}</span>` : '';
+        
+        // میسجز کی گنتی چیک کرنا
+        const msgs = Object.values(chatsData[uid]);
+        const userMsgs = msgs.filter(m => m.sender === 'user');
+        const seenCounts = window.getSeenCounts();
+        const unread = Math.max(0, userMsgs.length - (seenCounts[uid] || 0));
+        window.unreadCounts[uid] = unread;
+
+        // اگر ان-ریڈ میسج ہے تو سٹائل تبدیل کریں
+        const isUnread = unread > 0 && currentChatUID !== uid;
+        const nameStyle = isUnread ? 'color:var(--rose); font-weight:800;' : 'color:var(--text); font-weight:700;';
+        const itemBg = isUnread ? 'background: rgba(232, 49, 90, 0.05);' : '';
 
         html += `
-          <div class="chat-item ${isActive}" onclick="selectChat('${uid}','${esc(name)}','${color}')" id="ci-${uid}">
-            <div style="position:relative;width:42px;height:42px;flex-shrink:0">
+          <div class="chat-item ${isActive}" onclick="selectChat('${uid}','${esc(name)}','${color}')" id="ci-${uid}" style="${itemBg}">
+            <div id="av-wrap-${uid}" style="position:relative;width:42px;height:42px;flex-shrink:0">
               <div class="chat-av" style="background:${color};width:42px;height:42px;font-size:.88rem">${name.charAt(0).toUpperCase()}</div>
-              <span id="presence-dot-${uid}" style="
-                position:absolute;bottom:1px;right:1px;
-                width:10px;height:10px;border-radius:50%;
-                background:#6b7280;
-                border:2px solid var(--off); /* Changed border to off-white to contrast with the dark dot if needed */
-                display:inline-block;
-              "></span>
+              <span id="presence-dot-${uid}" style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#6b7280;border:2px solid #fff;display:inline-block;z-index:5;"></span>
+              ${isUnread ? `<span class="chat-unread-dp" style="position:absolute; top:-6px; right:-6px; background:var(--rose); color:#fff; font-size:0.65rem; font-weight:900; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:50px; border:2px solid #fff; z-index:10;">${unread > 99 ? '99+' : unread}</span>` : ''}
             </div>
-            <div style="flex:1;overflow:hidden">
-              <div class="chat-item-nm">${esc(name)}</div>
-              <div class="chat-item-last" style="font-size:.7rem;color:var(--text3);">${esc(subText)}</div>
+            <div style="flex:1;overflow:hidden;margin-left:10px;">
+              <div class="chat-item-nm" id="nm-${uid}" style="${nameStyle}">${esc(name)}</div>
+              <div class="chat-item-last" style="font-size:.74rem; ${isUnread ? 'color:var(--rose); font-weight:600;' : 'color:var(--text3);'}">
+                ${isUnread ? '📩 New Message' : esc(msgs[msgs.length-1].text || '')}
+              </div>
             </div>
-            ${badgeHtml}
+            ${isUnread ? `<div class="chat-unread" style="background:var(--rose); margin-left:5px;">${unread}</div>` : ''}
           </div>`;
       });
 
       el.innerHTML = html;
       el.scrollTop = scrollTop;
-
-      // Listen for presence
-      chatUids.forEach(uid => {
-        if (!window.presenceListeners[uid]) {
-          window.presenceListeners[uid] = true;
-          onValue(ref(firestoreDb, `users/${uid}/online`), snap => { // Listening to Firestore for presence
-            const dot = document.getElementById(`presence-dot-${uid}`);
-            if (dot) {
-              const isOnline = snap.exists() && snap.val() === true;
-              dot.style.background = isOnline ? '#22c55e' : '#6b7280';
-              dot.title = isOnline ? 'Online' : 'Offline';
-            }
-          });
-        }
-      });
-
-      // Listen for new messages
-      chatUids.forEach(uid => {
-        if (!window.chatListenersAdded[uid]) {
-          window.chatListenersAdded[uid] = true;
-
-          onValue(ref(db, `chats/${uid}`), snap => {
-            if (!snap.exists()) return;
-            const msgs = Object.values(snap.val());
-            const userMsgs = msgs.filter(m => m.sender === 'user');
-            const prevCnt = prevChatCount[uid] || 0;
-
-            if (userMsgs.length > prevCnt && prevCnt > 0) {
-              if (currentChatUID !== uid) {
-                const uName = (allUsers[uid] && allUsers[uid].name) ? allUsers[uid].name : 'Patient';
-                playSound('consult');
-                showNotif('consult', `💬 New message from ${uName}`, userMsgs[userMsgs.length-1].text?.substring(0,60)||'');
-
-                window.unreadCounts[uid] = (window.unreadCounts[uid] || 0) + 1;
-
-                const ci = document.getElementById(`ci-${uid}`);
-                if (ci) {
-                  let badge = ci.querySelector('.chat-unread');
-                  if (badge) {
-                    badge.textContent = window.unreadCounts[uid];
-                  } else {
-                    badge = document.createElement('span');
-                    badge.className = 'chat-unread';
-                    badge.textContent = window.unreadCounts[uid];
-                    ci.appendChild(badge);
-                  }
-                }
-                updateTotalConsultBadge();
-              }
-            }
-            prevChatCount[uid] = userMsgs.length;
-
-            if (currentChatUID === uid) renderChatMessages(snap);
-          });
-        }
-      });
+      updateTotalConsultBadge();
+      
+      // Active Chat Messages update
+      if (currentChatUID && chatsData[currentChatUID]) {
+        renderChatMessages(chatsData[currentChatUID]);
+      }
     });
   });
 }
@@ -1325,26 +1300,39 @@ window.selectChat = (uid, name, color) => {
   document.getElementById('cw-av').textContent = name.charAt(0).toUpperCase();
   document.getElementById('cw-av').style.background = color;
 
-  document.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
+  // UI سے ریڈ الرٹ فوراً ختم کرنا
   const ci = document.getElementById(`ci-${uid}`);
   if (ci) {
+    ci.style.background = '';
     ci.classList.add('active');
+    const nameEl = document.getElementById(`nm-${uid}`);
+    if (nameEl) { nameEl.style.color = 'var(--text)'; nameEl.style.fontWeight = '700'; }
     const badge = ci.querySelector('.chat-unread');
     if (badge) badge.remove();
+    const dpBadge = ci.querySelector('.chat-unread-dp');
+    if (dpBadge) dpBadge.remove();
   }
 
-  window.unreadCounts[uid] = 0;
-  updateTotalConsultBadge();
-
-  onValue(ref(db, `chats/${uid}`), snap => renderChatMessages(snap));
+  // Mark as Read
+  get(ref(db, `chats/${uid}`)).then(snap => {
+    if (snap.exists()) {
+      const msgs = Object.values(snap.val());
+      const userMsgs = msgs.filter(m => m.sender === 'user');
+      window.saveSeenCount(uid, userMsgs.length);
+      window.unreadCounts[uid] = 0;
+      updateTotalConsultBadge();
+      renderChatMessages(snap.val());
+    }
+  });
 };
 
-function renderChatMessages(snap) {
+function renderChatMessages(chatData) {
   const el = document.getElementById('cw-messages');
-  if (!snap.exists()) { el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:.84rem;padding:20px">No messages yet</div>'; return; }
+  if (!chatData) { el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:.84rem;padding:20px">No messages yet</div>'; return; }
+  
+  const messages = Object.values(chatData);
   el.innerHTML = '';
-  snap.forEach(child => {
-    const d = child.val();
+  messages.forEach(d => {
     const div = document.createElement('div');
     div.className = `msg-bubble msg-${d.sender==='user'?'user':'admin'}`;
     div.innerHTML = `${esc(d.text)}<div class="msg-time">${fmtTime(d.timestamp)}</div>`;
@@ -1360,9 +1348,8 @@ window.sendAdminMsg = async () => {
   await push(ref(db, `chats/${currentChatUID}`), {
     sender: 'admin', text: messageText, timestamp: Date.now()
   });
-  // Removed client-side FCM notification as it requires backend or exposed API keys.
   input.value = '';
-}; 
+};
 // ── VIDEOS ──
 function loadVideos() {
   onValue(ref(db,'videos'), snap => {
@@ -1695,10 +1682,23 @@ window.sendBroadcast = async () => {
 
 // ── SOUND ENGINE (Web Audio API) ──
 let AudioCtx = null;
+
+// براؤزر کی آڈیو پالیسی کو انلاک کرنے کے لیے
+function initAudio() {
+  if (!AudioCtx) {
+    AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (AudioCtx.state === 'suspended') {
+    AudioCtx.resume();
+  }
+}
+// ایڈمن جیسے ہی سکرین پر کہیں کلک کرے گا، آڈیو انلاک ہو جائے گی
+document.body.addEventListener('click', initAudio, { once: true });
+
 window.playSound = function(type) {
   if (!soundOn) return;
   try {
-    if (!AudioCtx) AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    initAudio(); // آڈیو کو ایکٹو کریں
     if (type === 'booking') {
       // Cheerful 3-note melody for booking
       [[520,0],[660,0.18],[780,0.36]].forEach(([freq,delay]) => {
@@ -1713,7 +1713,7 @@ window.playSound = function(type) {
         osc.start(AudioCtx.currentTime + delay);
         osc.stop(AudioCtx.currentTime + delay + 0.3);
       });
-    } else { // Default to 'consult' or general notification sound
+    } else { 
       // Soft 2-note chime for consultation
       [[440,0],[550,0.22]].forEach(([freq,delay]) => {
         const osc = AudioCtx.createOscillator();
@@ -1728,7 +1728,7 @@ window.playSound = function(type) {
         osc.stop(AudioCtx.currentTime + delay + 0.55);
       });
     }
-  } catch(e) { console.log('Audio not available'); }
+  } catch(e) { console.log('Audio not available', e); }
 };
 
 window.toggleSound = function() {
