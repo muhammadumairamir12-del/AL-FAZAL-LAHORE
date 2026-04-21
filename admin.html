@@ -276,7 +276,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
 .chat-list-hdr{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:800;font-size:.88rem;color:var(--text);display:flex;align-items:center;gap:7px;}
 .chat-item{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;display:flex;gap:10px;align-items:center;}
 .chat-item:hover{background:var(--off);}
-.chat-item.active{background:var(--rose-pale);border-right:3px solid var(--rose);}
+.chat-item.active{background:var(--rose-pale);border-right:333px solid var(--rose);}
 .chat-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.9rem;flex-shrink:0;}
 .chat-item-nm{font-size:.86rem;font-weight:700;color:var(--text);}
 .chat-item-last{font-size:.74rem;color:var(--text3);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:160px;}
@@ -287,8 +287,10 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
 .chat-win-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:livePulse 1.5s infinite;}
 .chat-messages{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:var(--off);min-height:320px;max-height:380px;}
 .msg-bubble{max-width:72%;padding:10px 15px;border-radius:14px;font-size:.85rem;line-height:1.55;}
-.msg-user{background:var(--rose);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
-.msg-admin{background:#fff;color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--sh1);}
+/* EDITED: Swap alignment for WhatsApp-like chat view from admin perspective */
+.msg-user{background:#fff;color:var(--text);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:var(--sh1);}
+.msg-admin{background:var(--rose);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+
 .msg-time{font-size:.65rem;opacity:.6;margin-top:3px;}
 .chat-input-row{padding:14px;border-top:1px solid var(--border);display:flex;gap:9px;}
 .chat-in{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;outline:none;transition:border-color .2s;}
@@ -402,7 +404,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
   <div class="login-box">
     <div class="login-logo">
       <div class="login-logo-ico">
-  <img src="https://scontent.flhe2-4.fna.fbcdn.net/v/t39.30808-6/668669594_122116458531233257_3345747139197208070_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeF-LTIJU9ySRcVa4sV0zysv_dH8l3Arfcz90fyXcCt9zMU9bORgm3rjWOKvTklnBE04bbhuk5nK0_3egvxhdRqT&_nc_ohc=U5WNLwU6hd8Q7kNvwHghVlF&_nc_oc=AdqOJ-Ac1llHmmPRDxgBVF7J7gLG9P4mJhMZUh2J5-_-KlcgAxV4XexlaGhA6UkanPw&_nc_zt=23&_nc_ht=scontent.flhe2-4.fna&_nc_gid=BL8LM-J3NYqKGiMOIqduPw&_nc_ss=7a3a8&oh=00_Af1nBC-TKukubOfGDW25DChFv9kr8WWaS3swFjQhYzAlaA&oe=69DD3C45" alt="Logo">
+  <img src="https://i.ibb.co/PGNCnd6r/favicon.png" alt="Logo">
 </div>
       <div class="login-logo-name">Al-Fazal Hospital</div>
       <div class="login-logo-sub">Medical &amp; Dental · Lahore</div>
@@ -435,7 +437,7 @@ tbody td{padding:13px 16px;color:var(--text2);vertical-align:middle;}
   <aside class="sidebar" id="sidebar">
     <div class="sb-header">
       <div class="sb-logo-ico">
-  <img src="https://scontent.flhe2-4.fna.fbcdn.net/v/t39.30808-6/668669594_122116458531233257_3345747139197208070_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeF-LTIJU9ySRcVa4sV0zysv_dH8l3Arfcz90fyXcCt9zMU9bORgm3rjWOKvTklnBE04bbhuk5nK0_3egvxhdRqT&_nc_ohc=U5WNLwU6hd8Q7kNvwHghVlF&_nc_oc=AdqOJ-Ac1llHmmPRDxgBVF7J7gLG9P4mJhMZUh2J5-_-KlcgAxV4XexlaGhA6UkanPw&_nc_zt=23&_nc_ht=scontent.flhe2-4.fna&_nc_gid=BL8LM-J3NYqKGiMOIqduPw&_nc_ss=7a3a8&oh=00_Af1nBC-TKukubOfGDW25DChFv9kr8WWaS3swFjQhYzAlaA&oe=69DD3C45" alt="Logo">
+  <img src="https://i.ibb.co/PGNCnd6r/favicon.png" alt="Logo">
 </div>
       <div class="sb-logo-txt">
         <div class="sb-logo-name">Al-Fazal</div>
@@ -1320,12 +1322,18 @@ window.selectChat = (uid, name, color) => {
   document.getElementById('cw-av').textContent = name.charAt(0).toUpperCase();
   document.getElementById('cw-av').style.background = color;
 
-  // Clear UI Alerts
+  // Remove active class from all, add to selected
+  document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
   const ci = document.getElementById(`ci-${uid}`);
   if (ci) {
-    ci.style.background = ''; ci.classList.add('active');
+    ci.classList.add('active');
+    ci.style.background = 'var(--rose-pale)'; // Visual feedback for active chat
     const nameEl = document.getElementById(`nm-${uid}`);
     if (nameEl) { nameEl.style.color = 'var(--text)'; nameEl.style.fontWeight = '700'; }
+    const unreadDot = ci.querySelector('.chat-unread-dp'); // Remove unread dot
+    if (unreadDot) unreadDot.remove();
+    const unreadBadge = ci.querySelector('.chat-unread'); // Remove unread badge
+    if (unreadBadge) unreadBadge.remove();
   }
 
   // Mark as Read
@@ -1342,14 +1350,29 @@ window.selectChat = (uid, name, color) => {
 
 function renderChatMessages(chatData) {
   const el = document.getElementById('cw-messages');
-  const messages = Object.values(chatData);
-  el.innerHTML = messages.map(d => `
-    <div class="msg-bubble msg-${d.sender==='user'?'user':'admin'}">
-      ${esc(d.text)}<div class="msg-time">${fmtTime(d.timestamp)}</div>
+  const messages = Object.entries(chatData); // Get [msgId, data] pairs
+  el.innerHTML = messages.map(([msgId, d]) => `
+    <div class="msg-bubble msg-${d.sender==='user'?'user':'admin'}" style="position:relative;">
+      ${esc(d.text)}
+      <div class="msg-time" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>${fmtTime(d.timestamp)}</span>
+        <button class="btn btn-red btn-xs" style="margin-left: 10px; opacity:0.7;" onclick="deleteChatMessage('${currentChatUID}', '${msgId}')" title="Delete Message"><i class="fas fa-trash"></i></button>
+      </div>
     </div>
   `).join('');
   el.scrollTop = el.scrollHeight;
 }
+
+window.deleteChatMessage = async (chatUid, msgId) => {
+    if (!confirm('Are you sure you want to delete this message? This action cannot be undone.')) return;
+    try {
+        await remove(ref(db, `chats/${chatUid}/${msgId}`));
+        toast('🗑 Message deleted.');
+    } catch (error) {
+        console.error("Error deleting message:", error);
+        toast('❌ Failed to delete message.', true);
+    }
+};
 
 window.sendAdminMsg = async () => {
   const input = document.getElementById('cw-input');
@@ -1717,7 +1740,7 @@ window.playSound = function(type) {
         osc.frequency.value = freq;
         osc.type = 'sine';
         gain.gain.setValueAtTime(0, AudioCtx.currentTime + delay);
-        gain.gain.linearRampToValueAtTime(0.3, AudioCtx.currentTime + delay + 0.02);
+        gain.gain.linearRampToValueAtTime(0.8, AudioCtx.currentTime + delay + 0.02); // Increased volume from 0.3 to 0.8
         gain.gain.exponentialRampToValueAtTime(0.001, AudioCtx.currentTime + delay + 0.28);
         osc.start(AudioCtx.currentTime + delay);
         osc.stop(AudioCtx.currentTime + delay + 0.3);
@@ -1731,7 +1754,7 @@ window.playSound = function(type) {
         osc.frequency.value = freq;
         osc.type = 'triangle';
         gain.gain.setValueAtTime(0, AudioCtx.currentTime + delay);
-        gain.gain.linearRampToValueAtTime(0.25, AudioCtx.currentTime + delay + 0.03);
+        gain.gain.linearRampToValueAtTime(0.7, AudioCtx.currentTime + delay + 0.03); // Increased volume from 0.25 to 0.7
         gain.gain.exponentialRampToValueAtTime(0.001, AudioCtx.currentTime + delay + 0.5);
         osc.start(AudioCtx.currentTime + delay);
         osc.stop(AudioCtx.currentTime + delay + 0.55);
